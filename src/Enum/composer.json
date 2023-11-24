@@ -1,5 +1,5 @@
 {
-    "name": "bakame/aide-enum",
+    "name": "bakame/aide-enums",
     "description": "Collection of traits to ease Enum manipulation in PHP",
     "type": "library",
     "keywords": ["enum", "named constructor", "isser", "hasser", "comparaison", "factory"],
