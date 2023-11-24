@@ -1,0 +1,76 @@
+{
+  "name": "bakame/aide",
+  "description": "Structured Field Values for HTTP manipulation in PHP",
+  "type": "library",
+  "keywords": ["helpers"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name" : "Ignace Nyamagana Butera",
+      "email" : "nyamsprod@gmail.com",
+      "homepage" : "https://github.com/nyamsprod/",
+      "role" : "Developer"
+    }
+  ],
+  "support": {
+    "docs": "https://github.com/bakame-php/aide",
+    "issues": "https://github.com/bakame-php/aide",
+    "source": "https://github.com/bakame-php/aide"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/nyamsprod"
+    }
+  ],
+  "require": {
+    "php" : "^8.1"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^v3.15.1",
+    "phpstan/phpstan": "^1.10.34",
+    "phpstan/phpstan-strict-rules": "^1.5.1",
+    "phpstan/phpstan-phpunit": "^1.3.14",
+    "phpstan/phpstan-deprecation-rules": "^1.1.4",
+    "phpunit/phpunit": "^10.3.4",
+    "symfony/var-dumper": "^6.3.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Bakame\\Aide\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Bakame\\Aide\\": "tests/"
+    }
+  },
+  "scripts": {
+    "benchmark": "phpbench run --report=default",
+    "phpcs": "php-cs-fixer fix --dry-run --diff -vvv --allow-risky=yes --ansi",
+    "phpcs:fix": "php-cs-fixer fix -vvv --allow-risky=yes --ansi",
+    "phpstan": "phpstan analyse -c phpstan.neon --ansi --memory-limit 192M",
+    "phpunit": "XDEBUG_MODE=coverage phpunit --coverage-text",
+    "test": [
+      "@phpunit",
+      "@phpstan",
+      "@phpcs"
+    ]
+  },
+  "scripts-descriptions": {
+    "phpstan": "Runs complete codebase static analysis",
+    "phpunit": "Runs unit and functional testing",
+    "phpcs": "Runs coding style testing",
+    "phpcs:fix": "Fix coding style issues",
+    "benchmark": "Runs parser benchmark",
+    "test": "Runs all tests"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-develop": "1.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

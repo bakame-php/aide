@@ -1,0 +1,9 @@
+{
+    "sub-splits": [
+        {
+            "name": "aide-enum",
+            "directory": "src/Enum",
+            "target": "git@github.com:bakame-php/aide-enum.git"
+        }
+    ]
+}
