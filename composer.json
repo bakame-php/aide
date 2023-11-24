@@ -45,18 +45,19 @@
       "Bakame\\Aide\\": "tests/"
     }
   },
-  "scripts": {
-    "benchmark": "phpbench run --report=default",
-    "phpcs": "php-cs-fixer fix --dry-run --diff -vvv --allow-risky=yes --ansi",
-    "phpcs:fix": "php-cs-fixer fix -vvv --allow-risky=yes --ansi",
-    "phpstan": "phpstan analyse -c phpstan.neon --ansi --memory-limit 192M",
-    "phpunit": "XDEBUG_MODE=coverage phpunit --coverage-text",
-    "test": [
-      "@phpunit",
-      "@phpstan",
-      "@phpcs"
-    ]
-  },
+    "scripts": {
+        "benchmark": "phpbench run src --report=default",
+        "phpcs": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix -vvv --diff --dry-run --allow-risky=yes --ansi",
+        "phpcs:fix": "php-cs-fixer fix -vvv --allow-risky=yes --ansi",
+        "phpstan": "phpstan analyse -c phpstan.neon --ansi --memory-limit=192M",
+        "phpunit": "XDEBUG_MODE=coverage phpunit --coverage-text",
+        "phpunit:min": "phpunit --no-coverage",
+        "test": [
+            "@phpunit",
+            "@phpstan",
+            "@phpcs"
+        ]
+    },
   "scripts-descriptions": {
     "phpstan": "Runs complete codebase static analysis",
     "phpunit": "Runs unit and functional testing",
