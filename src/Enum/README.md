@@ -190,32 +190,6 @@ enum HttpMethod: string
 }
 ```
 
-## Testing
-
-The library has:
-
-- a [PHPUnit](https://phpunit.de) test suite.
-- a coding style compliance test suite using [PHP CS Fixer](https://cs.symfony.com/).
-- a code analysis compliance test suite using [PHPStan](https://github.com/phpstan/phpstan).
-
-To run the tests, run the following command from the project folder.
-
-```bash
-composer test
-```
-
-## Contributing
-
-Contributions are welcome and will be fully credited. Please see [CONTRIBUTING](.github/CONTRIBUTING.md) and [CONDUCT](.github/CODE_OF_CONDUCT.md) for details.
-
-## Security
-
-If you discover any security related issues, please email nyamsprod@gmail.com instead of using the issue tracker.
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
 ## Credits
 
 - [ignace nyamagana butera](https://github.com/nyamsprod)
