@@ -28,7 +28,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Bakame\\Aide\\Enum\\": "src/"
+            "Bakame\\Aide\\Enum\\": ""
         }
     },
     "extra": {
