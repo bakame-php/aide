@@ -1,6 +1,6 @@
 {
   "name": "bakame/aide",
-  "description": "Structured Field Values for HTTP manipulation in PHP",
+  "description": "Tools and Helper to ease PHP development",
   "type": "library",
   "keywords": ["helpers"],
   "license": "MIT",

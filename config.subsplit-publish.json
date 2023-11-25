@@ -4,6 +4,11 @@
             "name": "aide-enum",
             "directory": "src/Enum",
             "target": "git@github.com:bakame-php/aide-enum.git"
+        },
+        {
+            "name": "aide-error",
+            "directory": "src/Error",
+            "target": "git@github.com:bakame-php/aide-error.git"
         }
     ]
 }
