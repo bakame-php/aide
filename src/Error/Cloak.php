@@ -7,6 +7,10 @@ namespace Bakame\Aide\Error;
 use Closure;
 use ErrorException;
 
+use function error_reporting;
+use function restore_error_handler;
+use function set_error_handler;
+
 use const E_ALL;
 use const E_DEPRECATED;
 use const E_NOTICE;
@@ -18,18 +22,25 @@ use const E_WARNING;
 
 class Cloak
 {
-    public const FORCE_NOTHING = 0;
-    public const SILENCE_ERROR = 1;
-    public const THROW_ON_ERROR = 2;
+    public const FOLLOW_ENV = 0;
+    public const SILENT = 1;
+    public const THROW = 2;
 
     protected static bool $useException = false;
     protected ?ErrorException $exception = null;
+    protected readonly ErrorLevel $errorLevel;
 
     public function __construct(
         protected readonly Closure $closure,
-        protected readonly int $errorLevel = E_WARNING,
-        protected readonly int $behaviour = self::FORCE_NOTHING
+        protected readonly int $onError = self::FOLLOW_ENV,
+        ErrorLevel|int|null $errorLevel = null
     ) {
+        $errorLevel = $errorLevel ?? ErrorLevel::fromEnvironment();
+        if (!$errorLevel instanceof ErrorLevel) {
+            $errorLevel = ErrorLevel::new($errorLevel);
+        }
+
+        $this->errorLevel = $errorLevel;
     }
 
     public static function throwOnError(): void
@@ -37,49 +48,54 @@ class Cloak
         self::$useException = true;
     }
 
-    public static function silenceError(): void
+    public static function silentOnError(): void
     {
         self::$useException = false;
     }
 
-    public static function warning(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function fromEnvironment(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_WARNING, $behaviour);
+        return new self(closure: $closure, onError: $onError, errorLevel: $onError);
     }
 
-    public static function notice(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function warning(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_NOTICE, $behaviour);
+        return new self($closure, $onError, E_WARNING);
     }
 
-    public static function deprecated(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function notice(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_DEPRECATED, $behaviour);
+        return new self($closure, $onError, E_NOTICE);
     }
 
-    public static function strict(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function deprecated(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_STRICT, $behaviour);
+        return new self($closure, $onError, E_DEPRECATED);
     }
 
-    public static function userWarning(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function strict(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_USER_WARNING, $behaviour);
+        return new self($closure, $onError, E_STRICT);
     }
 
-    public static function userNotice(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function userWarning(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_USER_NOTICE, $behaviour);
+        return new self($closure, $onError, E_USER_WARNING);
     }
 
-    public static function userDeprecated(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function userNotice(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_USER_DEPRECATED, $behaviour);
+        return new self($closure, $onError, E_USER_NOTICE);
     }
 
-    public static function all(Closure $closure, int $behaviour = self::FORCE_NOTHING): self
+    public static function userDeprecated(Closure $closure, int $onError = self::FOLLOW_ENV): self
     {
-        return new self($closure, E_ALL, $behaviour);
+        return new self($closure, $onError, E_USER_DEPRECATED);
+    }
+
+    public static function all(Closure $closure, int $onError = self::FOLLOW_ENV): self
+    {
+        return new self($closure, $onError, E_ALL);
     }
 
     /**
@@ -98,7 +114,7 @@ class Cloak
             return true;
         };
 
-        set_error_handler($errorHandler, $this->errorLevel);
+        set_error_handler($errorHandler, $this->errorLevel->toBytes());
         $result = ($this->closure)(...$arguments);
         restore_error_handler();
 
@@ -106,11 +122,11 @@ class Cloak
             return $result;
         }
 
-        if (self::THROW_ON_ERROR === $this->behaviour) { /* @phpstan-ignore-line */
+        if (self::THROW === $this->onError) { /* @phpstan-ignore-line */
             throw $this->exception;
         }
 
-        if (self::SILENCE_ERROR === $this->behaviour) {
+        if (self::SILENT === $this->onError) {
             return $result;
         }
 
@@ -133,52 +149,52 @@ class Cloak
 
     public function errorsAreThrown(): bool
     {
-        return self::THROW_ON_ERROR === $this->behaviour
-            || (self::SILENCE_ERROR !== $this->behaviour && true === self::$useException);
+        return self::THROW === $this->onError
+            || (self::SILENT !== $this->onError && true === self::$useException);
     }
 
-    public function suppressAll(): bool
+    public function includeAll(): bool
     {
-        return $this->suppress(E_ALL);
+        return $this->include(E_ALL);
     }
 
-    public function suppressWarning(): bool
+    public function includeWarning(): bool
     {
-        return $this->suppress(E_WARNING);
+        return $this->include(E_WARNING);
     }
 
-    public function suppressNotice(): bool
+    public function includeNotice(): bool
     {
-        return $this->suppress(E_NOTICE);
+        return $this->include(E_NOTICE);
     }
 
-    public function suppressDeprecated(): bool
+    public function includeDeprecated(): bool
     {
-        return $this->suppress(E_DEPRECATED);
+        return $this->include(E_DEPRECATED);
     }
 
-    public function suppressStrict(): bool
+    public function includeStrict(): bool
     {
-        return $this->suppress(E_STRICT);
+        return $this->include(E_STRICT);
     }
 
-    public function suppressUserWarning(): bool
+    public function includeUserWarning(): bool
     {
-        return $this->suppress(E_USER_WARNING);
+        return $this->include(E_USER_WARNING);
     }
 
-    public function suppressUserNotice(): bool
+    public function includeUserNotice(): bool
     {
-        return $this->suppress(E_USER_NOTICE);
+        return $this->include(E_USER_NOTICE);
     }
 
-    public function suppressUserDeprecated(): bool
+    public function includeUserDeprecated(): bool
     {
-        return $this->suppress(E_USER_DEPRECATED);
+        return $this->include(E_USER_DEPRECATED);
     }
 
-    public function suppress(int $errorLevel): bool
+    public function include(ErrorLevel|int $errorLevel): bool
     {
-        return 0 !== ($errorLevel & $this->errorLevel);
+        return $this->errorLevel->contains($errorLevel);
     }
 }

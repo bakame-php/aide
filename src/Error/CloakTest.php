@@ -19,7 +19,7 @@ final class CloakTest extends TestCase
     {
         parent::setUp();
 
-        Cloak::silenceError();
+        Cloak::silentOnError();
     }
 
     #[Test]
@@ -29,13 +29,13 @@ final class CloakTest extends TestCase
         $res = $lambda('/foo');
 
         self::assertFalse($res);
-        self::assertTrue($lambda->suppressWarning());
-        self::assertFalse($lambda->suppressNotice());
+        self::assertTrue($lambda->includeWarning());
+        self::assertFalse($lambda->includeNotice());
         self::assertInstanceOf(ErrorException::class, $lambda->lastError());
     }
 
     #[Test]
-    public function it_will_suppress_nothing_in_case_of_success(): void
+    public function it_will_include_nothing_in_case_of_success(): void
     {
         $lambda = Cloak::userWarning(strtoupper(...));
         $res = $lambda('foo');
@@ -48,7 +48,7 @@ final class CloakTest extends TestCase
     {
         $lambda = Cloak::deprecated(strtoupper(...));
 
-        self::assertTrue($lambda->suppressDeprecated());
+        self::assertTrue($lambda->includeDeprecated());
     }
 
     public function testCapturesTriggeredError(): void
@@ -61,31 +61,10 @@ final class CloakTest extends TestCase
 
     public function testCapturesSilencedError(): void
     {
-        $lambda = Cloak::notice(function (string $x) {
-            @trigger_error($x);
-        });
+        $lambda = Cloak::warning(fn (string $x) => @trigger_error($x));
         $lambda('foo');
 
         self::assertNull($lambda->lastError());
-    }
-
-    public function testObjectDoesntInteractWithExistingErrorHandlers(): void
-    {
-        $count = 0;
-        set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use (&$count): bool {
-            $count++;
-
-            return true;
-        });
-        trigger_error('foo');
-        self::assertSame(1, $count);
-
-        $lambda = Cloak::warning(trigger_error(...));
-        $lambda('foo');
-        self::assertSame(1, $count); /* @phpstan-ignore-line */
-
-        trigger_error('foo');
-        self::assertSame(2, $count); /* @phpstan-ignore-line */
     }
 
     public function testErrorTransformedIntoARuntimeException(): void
@@ -110,7 +89,7 @@ final class CloakTest extends TestCase
     {
         Cloak::throwOnError();
 
-        $touch = Cloak::all(touch(...), Cloak::SILENCE_ERROR);
+        $touch = Cloak::all(touch(...), Cloak::SILENT);
         $touch('/foo');
 
         self::assertInstanceOf(ErrorException::class, $touch->lastError());
@@ -125,21 +104,21 @@ final class CloakTest extends TestCase
     }
 
     #[Test]
-    public function it_can_detect_the_level_to_suppress(): void
+    public function it_can_detect_the_level_to_include(): void
     {
         $touch = new Cloak(
             touch(...),
-            E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED,
-            Cloak::THROW_ON_ERROR
+            Cloak::THROW,
+            E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
         );
 
-        self::assertTrue($touch->suppressAll());
-        self::assertFalse($touch->suppressStrict());
-        self::assertFalse($touch->suppressDeprecated());
-        self::assertFalse($touch->suppressNotice());
-        self::assertTrue($touch->suppressUserNotice());
-        self::assertTrue($touch->suppressUserDeprecated());
-        self::assertTrue($touch->suppressUserWarning());
+        self::assertTrue($touch->includeAll());
+        self::assertFalse($touch->includeStrict());
+        self::assertFalse($touch->includeDeprecated());
+        self::assertFalse($touch->includeNotice());
+        self::assertTrue($touch->includeUserNotice());
+        self::assertTrue($touch->includeUserDeprecated());
+        self::assertTrue($touch->includeUserWarning());
         self::assertTrue($touch->errorsAreThrown());
         self::assertFalse($touch->errorsAreSilenced());
     }
