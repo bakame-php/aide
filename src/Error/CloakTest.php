@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bakame\Aide\Error;
 
-use ErrorException;
+use Exception;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -12,6 +12,7 @@ use const E_ALL;
 use const E_DEPRECATED;
 use const E_NOTICE;
 use const E_STRICT;
+use const E_WARNING;
 
 final class CloakTest extends TestCase
 {
@@ -29,9 +30,9 @@ final class CloakTest extends TestCase
         $res = $lambda('/foo');
 
         self::assertFalse($res);
-        self::assertTrue($lambda->includeWarning());
-        self::assertFalse($lambda->includeNotice());
-        self::assertInstanceOf(ErrorException::class, $lambda->lastError());
+        self::assertTrue($lambda->errorLevel()->contains(E_WARNING));
+        self::assertFalse($lambda->errorLevel()->contains(E_NOTICE));
+        self::assertCount(1, $lambda->errors());
     }
 
     #[Test]
@@ -41,14 +42,14 @@ final class CloakTest extends TestCase
         $res = $lambda('foo');
 
         self::assertSame('FOO', $res);
-        self::assertNull($lambda->lastError());
+        self::assertCount(0, $lambda->errors());
     }
 
     public function testGetErrorReporting(): void
     {
         $lambda = Cloak::deprecated(strtoupper(...));
 
-        self::assertTrue($lambda->includeDeprecated());
+        self::assertTrue($lambda->errorLevel()->contains(E_DEPRECATED));
     }
 
     public function testCapturesTriggeredError(): void
@@ -56,7 +57,7 @@ final class CloakTest extends TestCase
         $lambda = Cloak::all(trigger_error(...));
         $lambda('foo');
 
-        self::assertSame('foo', $lambda->lastError()?->getMessage());
+        self::assertSame('foo', $lambda->errors()->last()?->getMessage());
     }
 
     public function testCapturesSilencedError(): void
@@ -64,12 +65,12 @@ final class CloakTest extends TestCase
         $lambda = Cloak::warning(fn (string $x) => @trigger_error($x));
         $lambda('foo');
 
-        self::assertNull($lambda->lastError());
+        self::assertTrue($lambda->errors()->isEmpty());
     }
 
     public function testErrorTransformedIntoARuntimeException(): void
     {
-        $this->expectException(ErrorException::class);
+        $this->expectException(CloakedErrors::class);
 
         Cloak::throwOnError();
         $touch = Cloak::warning(touch(...));
@@ -79,7 +80,7 @@ final class CloakTest extends TestCase
     public function testErrorTransformedIntoAnInvalidArgumentException(): void
     {
         Cloak::throwOnError();
-        $this->expectException(ErrorException::class);
+        $this->expectException(CloakedErrors::class);
 
         $touch = Cloak::all(touch(...));
         $touch('/foo');
@@ -87,12 +88,11 @@ final class CloakTest extends TestCase
 
     public function testSpecificBehaviourOverrideGeneralErrorSetting(): void
     {
-        Cloak::throwOnError();
+        $this->expectNotToPerformAssertions();
 
+        Cloak::throwOnError();
         $touch = Cloak::all(touch(...), Cloak::SILENT);
         $touch('/foo');
-
-        self::assertInstanceOf(ErrorException::class, $touch->lastError());
     }
 
     public function testCaptureNothingThrowNoException(): void
@@ -112,14 +112,37 @@ final class CloakTest extends TestCase
             E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
         );
 
-        self::assertTrue($touch->includeAll());
-        self::assertFalse($touch->includeStrict());
-        self::assertFalse($touch->includeDeprecated());
-        self::assertFalse($touch->includeNotice());
-        self::assertTrue($touch->includeUserNotice());
-        self::assertTrue($touch->includeUserDeprecated());
-        self::assertTrue($touch->includeUserWarning());
+        $errorLevel = $touch->errorLevel();
+
+        self::assertFalse($errorLevel->contains(E_NOTICE));
         self::assertTrue($touch->errorsAreThrown());
         self::assertFalse($touch->errorsAreSilenced());
+    }
+
+    #[Test]
+    public function it_can_collection_all_errors(): void
+    {
+        $closure = function (string $path): array|false {
+            touch($path);
+
+            return file($path);
+        };
+
+        $lambda = Cloak::warning($closure);
+        $res = $lambda('/foobar');
+        $errors = $lambda->errors();
+        self::assertFalse($res);
+        self::assertCount(2, $errors);
+        self::assertStringContainsString('touch(): Unable to create file /foobar because', $errors->first()?->getMessage() ?? '');
+        self::assertSame('file(/foobar): Failed to open stream: No such file or directory', $errors->last()?->getMessage() ?? '');
+    }
+
+    #[Test]
+    public function it_does_not_interfer_with_exception(): void
+    {
+        $this->expectException(Exception::class);
+
+        $lambda = Cloak::warning(fn () => throw new Exception());
+        $lambda();
     }
 }

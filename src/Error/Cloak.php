@@ -27,7 +27,7 @@ class Cloak
     public const THROW = 2;
 
     protected static bool $useException = false;
-    protected ?ErrorException $exception = null;
+    protected CloakedErrors $errors;
     protected readonly ErrorLevel $errorLevel;
 
     public function __construct(
@@ -41,6 +41,7 @@ class Cloak
         }
 
         $this->errorLevel = $errorLevel;
+        $this->errors = new CloakedErrors();
     }
 
     public static function throwOnError(): void
@@ -99,31 +100,37 @@ class Cloak
     }
 
     /**
-     * @throws ErrorException
+     * @throws CloakedErrors
      */
     public function __invoke(mixed ...$arguments): mixed
     {
-        $this->exception = null;
+        if ($this->errors->isNotEmpty()) {
+            $this->errors = new CloakedErrors();
+        }
+
         $errorHandler = function (int $errno, string $errstr, string $errfile, int $errline): bool {
             if (0 === (error_reporting() & $errno)) {
                 return false;
             }
 
-            $this->exception = new ErrorException($errstr, 0, $errno, $errfile, $errline);
+            $this->errors->unshift(new ErrorException($errstr, 0, $errno, $errfile, $errline));
 
             return true;
         };
 
-        set_error_handler($errorHandler, $this->errorLevel->toBytes());
-        $result = ($this->closure)(...$arguments);
-        restore_error_handler();
+        try {
+            set_error_handler($errorHandler, $this->errorLevel->toBytes());
+            $result = ($this->closure)(...$arguments);
+        } finally {
+            restore_error_handler();
+        }
 
-        if (null === $this->exception) { /* @phpstan-ignore-line */
+        if ($this->errors->isEmpty()) {
             return $result;
         }
 
-        if (self::THROW === $this->onError) { /* @phpstan-ignore-line */
-            throw $this->exception;
+        if (self::THROW === $this->onError) {
+            throw $this->errors;
         }
 
         if (self::SILENT === $this->onError) {
@@ -131,15 +138,20 @@ class Cloak
         }
 
         if (true === self::$useException) {
-            throw $this->exception;
+            throw $this->errors;
         }
 
         return $result;
     }
 
-    public function lastError(): ?ErrorException
+    public function errors(): CloakedErrors
     {
-        return $this->exception;
+        return $this->errors;
+    }
+
+    public function errorLevel(): ErrorLevel
+    {
+        return $this->errorLevel;
     }
 
     public function errorsAreSilenced(): bool
@@ -151,50 +163,5 @@ class Cloak
     {
         return self::THROW === $this->onError
             || (self::SILENT !== $this->onError && true === self::$useException);
-    }
-
-    public function includeAll(): bool
-    {
-        return $this->include(E_ALL);
-    }
-
-    public function includeWarning(): bool
-    {
-        return $this->include(E_WARNING);
-    }
-
-    public function includeNotice(): bool
-    {
-        return $this->include(E_NOTICE);
-    }
-
-    public function includeDeprecated(): bool
-    {
-        return $this->include(E_DEPRECATED);
-    }
-
-    public function includeStrict(): bool
-    {
-        return $this->include(E_STRICT);
-    }
-
-    public function includeUserWarning(): bool
-    {
-        return $this->include(E_USER_WARNING);
-    }
-
-    public function includeUserNotice(): bool
-    {
-        return $this->include(E_USER_NOTICE);
-    }
-
-    public function includeUserDeprecated(): bool
-    {
-        return $this->include(E_USER_DEPRECATED);
-    }
-
-    public function include(ErrorLevel|int $errorLevel): bool
-    {
-        return $this->errorLevel->contains($errorLevel);
     }
 }

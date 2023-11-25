@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Bakame\Aide\Error;
 
-use OutOfBoundsException;
-
+use OutOfRangeException;
 use ValueError;
 
 use function array_filter;
@@ -79,9 +78,17 @@ class ErrorLevel
 
     public function contains(self|int ...$levels): bool
     {
+        if (-1 === $this->value) {
+            return true;
+        }
+
+        if (0 === $this->value) {
+            return false;
+        }
+
         foreach ($levels as $level) {
-            $level = $level instanceof self ? $level->toBytes() : $level;
-            if (0 !== ($level & $this->toBytes())) {
+            $level = $level instanceof self ? $level->value : $level;
+            if (0 !== ($level & $this->value)) {
                 return true;
             }
         }
@@ -111,7 +118,7 @@ class ErrorLevel
         $value = 0 === $this->value ? $levels[0] : $this->value;
         foreach ($levels as $level) {
             if (!in_array($level, self::LEVELS, true)) {
-                throw new OutOfBoundsException('The error reporting level value `'.$level.'` is invalid.');
+                throw new OutOfRangeException('The error reporting level value `'.$level.'` is invalid.');
             }
 
             $value &= $level;
@@ -139,7 +146,7 @@ class ErrorLevel
         $value = $this->value;
         foreach ($levels as $level) {
             if (!in_array($level, self::LEVELS, true)) {
-                throw new OutOfBoundsException('The error reporting level value `'.$level.'` is invalid.');
+                throw new OutOfRangeException('The error reporting level value `'.$level.'` is invalid.');
             }
             $value &= ~$level;
         }

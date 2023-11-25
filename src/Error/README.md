@@ -39,15 +39,17 @@ $res = @touch('/foo'); // bad and not recommended
 set_error_handler(fn (int $errno, string $errstr, string $errfile, int $errline) => true);
 $res = touch('/foo'); 
 restore_error_handler();
-// better but you lost some information is case of error
-// and having to write this everytime as it is overkill
+// better but you lost some information in case of error
+// having to write this everytime is overkill
 
 //using Cloak
 $touch = Cloak::all(touch(...));
-$res = $lambda('/foo');
-$lambda->lastError(); 
-// returns the last error as an \ErrorException
-// if an error occurred or `null` on success
+$res = $touch('/foo');
+$touch->errors(); //returns a CloakedErrors
+// returns a CloakedErrors instance
+// the instance is empty on success
+// otherwise contains all the \ErrorExceptions
+// generated during the closure execution
 ````
 
 You can control its behaviour on your global codebase
@@ -56,12 +58,13 @@ You can control its behaviour on your global codebase
 <?php
 
 use Bakame\Aide\Error\Cloak;
+use Bakame\Aide\Error\CloakedErrors;
 
 Cloak::throwOnError();
 
 try {
     $touch = Cloak::warning(touch(...));
-} catch (\ErrorException $exception)
+} catch (CloakedErrors $exception)
 }
 ````
 
@@ -75,9 +78,9 @@ use Bakame\Aide\Error\Cloak;
 Cloak::throwOnError(); // by default calls via Cloack should throw
 
 if (!$touch = Cloak::warning(touch(...), Cloak::SILENT)) {
-    //the error is still available via `lastError`
-    // but no throwing will happen
-    $touch->lastError();
+    // errors are still available via the `errors` methpd
+    // but throwing will not happen
+    $touch->errors();
 }
 ````
 
@@ -86,36 +89,34 @@ if (!$touch = Cloak::warning(touch(...), Cloak::SILENT)) {
 ### Accessing the Error Reporting Level
 
 Once instantiated, you can always access the error reporting level via
-the `suppress*` methods. For instance if you need to know if a 
-specific error will be suppressed you can do the following:
+the `errorLevel` method. For instance if you need to know if a 
+specific error is included you can do the following:
 
 ```php
 $touch = Cloak::all(touch(...));
-$touch->includeWarning();  //tells if the E_WARNING is included or not
-```
-
-The following methods are available.
-
-```php
-<?php
-use Bakame\Aide\Error\Cloak;
-
-Cloak::includeAll();
-Cloak::includeWarning();
-Cloak::includeNotice();
-Cloak::includeDeprecated();
-Cloak::includeStrict();
-Cloak::includeUserWarning();
-Cloak::includeUserNotice();
-Cloak::includeUserDeprecated();
+$touch->errorLevel()->contains(E_WARNING);  //tells if the E_WARNING is included or not
 ```
 
 ### Accessing the error
 
-To access the last error store in the instance you need to call the `Cloak::lastError` method.
-If no error occurred during the last execution of the class the method will return `null`,
-otherwise you will get an `\ErrorException` class containing all the detail about the
-last error.
+To access the errors store in the instance you need to call the `Cloak::errors` method
+which will return a `CloakedErrors` instance. This exception which extends PHP's 
+`RuntimeException` is a container where you can access all the `ErrorException` generated
+during the execution of the closure.
+If no error occurred during the last execution of the class the `CloakedErrors` instance
+will be empty, otherwise you will get all the `\ErrorException` instances generated.
+
+```php
+$touch = Cloak::all(touch(...));
+$touch('/foobar');
+$errors = $touch->errors(); // $errors is a CloakedErrors instance
+$errors->isEmpty(); //true if the execution generated 0 ErrorException; false otherwise
+foreach ($errors as $error) {
+    $error; //ErrorException instances ordered from the newest one -> oldest one.
+}
+$errors->first(); // the oldest ErrorException
+$errors->last();  // the newest ErrorException
+```
 
 ### Controlling when to throw or not your errors.
 
