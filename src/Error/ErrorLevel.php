@@ -75,27 +75,37 @@ class ErrorLevel
         return new self(error_reporting());
     }
 
-    public static function fromExclusion(string|int ...$levels): self
+    public static function fromExclusion(self|string|int ...$levels): self
     {
-        return new self(array_reduce($levels, function (int $carry, string|int $level) {
-            $errorLevel = is_string($level) ? self::fromName($level)->value : $level;
-            if (!array_key_exists($errorLevel, self::LEVELS)) {
+        return new self(array_reduce($levels, function (int $carry, self|string|int $level) {
+            $level = match (true) {
+                $level instanceof ErrorLevel => $level->value,
+                is_string($level) => ErrorLevel::fromName($level)->value,
+                default => ErrorLevel::fromValue($level)->value,
+            };
+
+            if (!array_key_exists($level, self::LEVELS)) {
                 throw new ValueError('The value `'.$level.'` is invalid as a error reporting level value in PHP.');
             }
 
-            return $carry & ~$errorLevel;
+            return $carry & ~$level;
         }, E_ALL));
     }
 
-    public static function fromInclusion(string|int ...$levels): self
+    public static function fromInclusion(self|string|int ...$levels): self
     {
-        return new self(array_reduce($levels, function (int $carry, string|int $level) {
-            $errorLevel = is_string($level) ? self::fromName($level)->value : $level;
-            if (!array_key_exists($errorLevel, self::LEVELS)) {
+        return new self(array_reduce($levels, function (int $carry, self|string|int $level) {
+            $level = match (true) {
+                $level instanceof ErrorLevel => $level->value,
+                is_string($level) => ErrorLevel::fromName($level)->value,
+                default => ErrorLevel::fromValue($level)->value,
+            };
+
+            if (!array_key_exists($level, self::LEVELS)) {
                 throw new ValueError('The value `'.$level.'` is invalid as a error reporting level value in PHP.');
             }
 
-            return $carry | $errorLevel;
+            return $carry | $level;
         }, 0));
     }
 
