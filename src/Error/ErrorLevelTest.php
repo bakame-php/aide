@@ -145,4 +145,20 @@ final class ErrorLevelTest extends TestCase
 
         ErrorLevel::fromValue(-2);
     }
+
+    #[Test]
+    public function it_fails_to_create_error_level_by_inclusion_with_invalid_positive_integer(): void
+    {
+        $this->expectException(ValueError::class);
+
+        ErrorLevel::fromInclusion(23);
+    }
+
+    #[Test]
+    public function it_fails_to_create_error_level_by_exclusion_with_invalid_positive_integer(): void
+    {
+        $this->expectException(ValueError::class);
+
+        ErrorLevel::fromExclusion(23);
+    }
 }

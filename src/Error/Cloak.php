@@ -101,10 +101,7 @@ class Cloak
      */
     public function __invoke(mixed ...$arguments): mixed
     {
-        if ($this->errors->isNotEmpty()) {
-            $this->errors = new CloakedErrors();
-        }
-
+        $this->errors = new CloakedErrors();
         $errorHandler = function (int $errno, string $errstr, string $errfile, int $errline): bool {
             if (0 === (error_reporting() & $errno)) {
                 return false;
@@ -122,23 +119,11 @@ class Cloak
             restore_error_handler();
         }
 
-        if ($this->errors->isEmpty()) {
-            return $result;
-        }
-
-        if (self::THROW === $this->onError) {
-            throw $this->errors;
-        }
-
-        if (self::SILENT === $this->onError) {
-            return $result;
-        }
-
-        if (true === self::$useException) {
-            throw $this->errors;
-        }
-
-        return $result;
+        return match (true) {
+            $this->errors->isEmpty(),
+            $this->errorsAreSilenced() => $result,
+            default => throw $this->errors,
+        };
     }
 
     public function errors(): CloakedErrors

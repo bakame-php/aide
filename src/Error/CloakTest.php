@@ -8,6 +8,8 @@ use Exception;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
+use ValueError;
+
 use const E_ALL;
 use const E_DEPRECATED;
 use const E_NOTICE;
@@ -91,7 +93,7 @@ final class CloakTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         Cloak::throwOnError();
-        $touch = Cloak::all(touch(...), Cloak::SILENT);
+        $touch = Cloak::userDeprecated(touch(...), Cloak::SILENT);
         $touch('/foo');
     }
 
@@ -133,6 +135,10 @@ final class CloakTest extends TestCase
         $errors = $lambda->errors();
         self::assertFalse($res);
         self::assertCount(2, $errors);
+        self::assertTrue($errors->isNotEmpty());
+        self::assertFalse($errors->isEmpty());
+        self::assertCount(2, [...$errors]);
+
         self::assertStringContainsString('touch(): Unable to create file /foobar because', $errors->first()?->getMessage() ?? '');
         self::assertSame('file(/foobar): Failed to open stream: No such file or directory', $errors->last()?->getMessage() ?? '');
     }
@@ -142,7 +148,23 @@ final class CloakTest extends TestCase
     {
         $this->expectException(Exception::class);
 
-        $lambda = Cloak::warning(fn () => throw new Exception());
+        $lambda = Cloak::userNotice(fn () => throw new Exception());
         $lambda();
+    }
+
+    #[Test]
+    public function it_does_use_the_current_error_reporting_level(): void
+    {
+        $lambda = Cloak::fromEnvironment(fn () => true, Cloak::SILENT);
+        $lambda();
+        self::assertSame($lambda->errorLevel()->value(), ErrorLevel::fromEnvironment()->value());
+    }
+
+    #[Test]
+    public function it_will_fail_instantiation_with_wrong_settings(): void
+    {
+        $this->expectException(ValueError::class);
+
+        new Cloak(fn () => true, -1, E_WARNING);
     }
 }
