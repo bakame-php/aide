@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Bakame\Aide\Error;
 
-use OutOfRangeException;
 use ValueError;
 
-use function array_filter;
-use function array_map;
+use function array_key_exists;
+use function array_search;
 use function error_reporting;
-use function in_array;
 
 use const E_ALL;
 use const E_COMPILE_ERROR;
@@ -31,24 +29,22 @@ use const E_WARNING;
 class ErrorLevel
 {
     protected const LEVELS = [
-        -1,
-        0,
-        E_ERROR,
-        E_WARNING,
-        E_PARSE,
-        E_NOTICE,
-        E_CORE_ERROR,
-        E_CORE_WARNING,
-        E_COMPILE_ERROR,
-        E_COMPILE_WARNING,
-        E_RECOVERABLE_ERROR,
-        E_ALL,
-        E_DEPRECATED,
-        E_STRICT,
-        E_USER_ERROR,
-        E_USER_WARNING,
-        E_USER_NOTICE,
-        E_USER_DEPRECATED,
+        E_ALL => 'E_ALL',
+        E_ERROR => 'E_ERROR',
+        E_WARNING => 'E_WARNING',
+        E_PARSE => 'E_PARSE',
+        E_NOTICE => 'E_NOTICE',
+        E_CORE_ERROR => 'E_CORE_ERROR',
+        E_CORE_WARNING => 'E_CORE_WARNING',
+        E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+        E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+        E_USER_ERROR => 'E_USER_ERROR',
+        E_USER_WARNING => 'E_USER_WARNING',
+        E_USER_NOTICE => 'E_USER_NOTICE',
+        E_STRICT => 'E_STRICT',
+        E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+        E_DEPRECATED => 'E_DEPRECATED',
+        E_USER_DEPRECATED => 'E_USER_DEPRECATED',
     ];
 
     private function __construct(protected readonly int $value)
@@ -58,99 +54,78 @@ class ErrorLevel
         }
     }
 
-    public static function new(int $bytes = 0): self
+    public static function fromValue(int $value): self
     {
-        return new self($bytes);
+        return new self($value);
+    }
+
+    public static function fromName(string $name): self
+    {
+        /** @var int|false $errorLevel */
+        $errorLevel = array_search($name, self::LEVELS, true);
+        if (false === $errorLevel) {
+            throw new ValueError('The name `'.$name.'` is invalid or unknown error reporting level name.');
+        }
+
+        return new self($errorLevel);
     }
 
     public static function fromEnvironment(): self
     {
-        $errorReporting = error_reporting(-1);
-        error_reporting($errorReporting);
-
-        return new self($errorReporting);
+        return new self(error_reporting());
     }
 
-    public function toBytes(): int
+    public static function fromExclusion(string|int ...$levels): self
+    {
+        return new self(array_reduce($levels, function (int $carry, string|int $level) {
+            $errorLevel = is_string($level) ? self::fromName($level)->value : $level;
+            if (!array_key_exists($errorLevel, self::LEVELS)) {
+                throw new ValueError('The value `'.$level.'` is invalid as a error reporting level value in PHP.');
+            }
+
+            return $carry & ~$errorLevel;
+        }, E_ALL));
+    }
+
+    public static function fromInclusion(string|int ...$levels): self
+    {
+        return new self(array_reduce($levels, function (int $carry, string|int $level) {
+            $errorLevel = is_string($level) ? self::fromName($level)->value : $level;
+            if (!array_key_exists($errorLevel, self::LEVELS)) {
+                throw new ValueError('The value `'.$level.'` is invalid as a error reporting level value in PHP.');
+            }
+
+            return $carry | $errorLevel;
+        }, 0));
+    }
+
+    public function value(): int
     {
         return $this->value;
     }
 
-    public function contains(self|int ...$levels): bool
+    public function contains(self|string|int ...$levels): bool
     {
+        if ([] === $levels || 0 === $this->value) {
+            return false;
+        }
+
         if (-1 === $this->value) {
             return true;
         }
 
-        if (0 === $this->value) {
-            return false;
-        }
-
         foreach ($levels as $level) {
-            $level = $level instanceof self ? $level->value : $level;
-            if (0 !== ($level & $this->value)) {
-                return true;
+            $level = match (true) {
+                $level instanceof ErrorLevel => $level->value,
+                is_string($level) => ErrorLevel::fromName($level)->value,
+                is_int($level) => ErrorLevel::fromValue($level)->value,
+            };
+
+            if (1 > $level || $level !== ($this->value & $level)) {
+                return false;
             }
         }
 
-        return false;
-    }
-
-    public function include(self|int ...$levels): self
-    {
-        $levels = array_map(fn (self|int $level) => match (true) {
-            $level instanceof self => $level->value,
-            default => $level,
-        }, $levels);
-
-        if ([] === $levels) {
-            return $this;
-        }
-
-        if (in_array(-1, $levels, true)) {
-            return self::new(-1);
-        }
-
-        if (in_array(0, $levels, true)) {
-            return self::new(0);
-        }
-
-        $value = 0 === $this->value ? $levels[0] : $this->value;
-        foreach ($levels as $level) {
-            if (!in_array($level, self::LEVELS, true)) {
-                throw new OutOfRangeException('The error reporting level value `'.$level.'` is invalid.');
-            }
-
-            $value &= $level;
-        }
-
-        return self::new($value);
-    }
-
-    public function ignore(self|int ...$levels): self
-    {
-        $levels = array_map(fn (self|int $level) => match (true) {
-            $level instanceof self => $level->value,
-            default => $level,
-        }, $levels);
-
-        if (in_array(-1, $levels, true)) {
-            return self::new(0);
-        }
-
-        $levels = array_filter($levels, fn (int $level) => 0 !== $level && $this->value !== $level);
-        if ([] === $levels) {
-            return $this;
-        }
-
-        $value = $this->value;
-        foreach ($levels as $level) {
-            if (!in_array($level, self::LEVELS, true)) {
-                throw new OutOfRangeException('The error reporting level value `'.$level.'` is invalid.');
-            }
-            $value &= ~$level;
-        }
-
-        return self::new($value);
+        return true;
     }
 }

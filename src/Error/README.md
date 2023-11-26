@@ -116,6 +116,11 @@ foreach ($errors as $error) {
 }
 $errors->first(); // the oldest ErrorException
 $errors->last();  // the newest ErrorException
+$errors->get(2); 
+$errors->get(-2);
+// returns any of the ErrorException and accept negative index.
+// the three (3) methods will return `null` if no exception
+// exists for the specified offset
 ```
 
 ### Controlling when to throw or not your errors.
@@ -140,7 +145,6 @@ Cloak::all();
 Cloak::warning();
 Cloak::notice();
 Cloak::deprecated();
-Cloak::strict();
 Cloak::userWarning();
 Cloak::userNotice();
 Cloak::userDeprecated();
@@ -183,17 +187,18 @@ use Bakame\Aide\Error\ErrorLevel;
 $touch = new Cloak(
     touch(...),
     Cloak::THROW,
-    ErrorLevel::new(E_ALL)->ignore(E_NOTICE, E_STRICT, E_DEPRECATED)
+    ErrorLevel::fromExclusion(E_NOTICE, E_STRICT, E_DEPRECATED)
 );
 ```
 
 The class contains five (5) methods to ease working with error reporting level:
 
-`ErrorLevel::new` allow instantiating the class with any value you want. Alternatively, you can
+`ErrorLevel::fromValue` allow instantiating the class with any value you want. Alternatively, you can
 instantiate the class to match your current environment settings using `ErrorLevel::fromEnvironment`.
-
-To ignore or include error reporting level just use the `include` or `exclude` nethods which returns a
-new object on each different value given.
+`ErrorLevel::fromInclusion` instantiate the error level by adding all the submitted values via a 
+bitwise `OR` operation starting at `0` meaning that no Error reporting level exists if none is added.
+Conversely `ErrorLevel::fromExclusion` does the opposite, each value given will be remove from the
+maximum value `E_ALL`.
 
 Last but not least you can tell which error reporting is being configured using the `contains` method.
 
@@ -202,16 +207,13 @@ Last but not least you can tell which error reporting is being configured using 
 
 use Bakame\Aide\Error\ErrorLevel;
 
-ErrorLevel::fromEnvironment()->contains(E_STRICT);
-// returns true if the current value in error_reporting contains `E_STRICT`
+ErrorLevel::fromEnvironment()->contains(E_WARNING);
+// returns true if the current value in error_reporting contains `E_WARNING`
 // returns false otherwise.
 
- $errorLevel = ErrorLevel::new()
-    ->include(E_ALL, E_USER_ERROR)
-    ->ignore(E_NOTICE, E_STRICT, E_DEPRECATED)
-    ->toBytes();
-// `toBytes` returns the int value corresponding to the calculated error level.
-//  as per PHP docs this value may differ per PHP version.
+ $errorLevel = ErrorLevel::fromExclusion(E_NOTICE, E_DEPRECATED)->value();
+// `value` returns the int value corresponding to the calculated error level.
+//  the errorLevel calculated will ignore notice, and deprecated error.
 ```
 
 ## Credits

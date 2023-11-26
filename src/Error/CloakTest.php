@@ -98,7 +98,7 @@ final class CloakTest extends TestCase
     public function testCaptureNothingThrowNoException(): void
     {
         Cloak::throwOnError();
-        $strtoupper = Cloak::strict(strtoupper(...));
+        $strtoupper = Cloak::notice(strtoupper(...));
 
         self::assertSame('FOO', $strtoupper('foo'));
     }
