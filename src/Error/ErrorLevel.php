@@ -10,6 +10,7 @@ use function array_key_exists;
 use function array_search;
 use function error_reporting;
 
+use const ARRAY_FILTER_USE_KEY;
 use const E_ALL;
 use const E_COMPILE_ERROR;
 use const E_COMPILE_WARNING;
@@ -116,7 +117,7 @@ class ErrorLevel
 
     public function contains(self|string|int ...$levels): bool
     {
-        if ([] === $levels || 0 === $this->value) {
+        if ([] === $levels) {
             return false;
         }
 
@@ -130,6 +131,10 @@ class ErrorLevel
             return true;
         }
 
+        if (0 === $this->value) {
+            return false;
+        }
+
         foreach ($levels as $level) {
             if (1 > $level || $level !== ($this->value & $level)) {
                 return false;
@@ -137,5 +142,29 @@ class ErrorLevel
         }
 
         return true;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function included(): array
+    {
+        return array_values(array_filter(
+            self::LEVELS,
+            fn (int $error): bool => 0 !== ($error & $this->value),
+            ARRAY_FILTER_USE_KEY
+        ));
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function excluded(): array
+    {
+        return array_values(array_filter(
+            self::LEVELS,
+            fn (int $error): bool => 0 === ($error & $this->value),
+            ARRAY_FILTER_USE_KEY
+        ));
     }
 }
