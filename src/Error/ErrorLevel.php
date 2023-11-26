@@ -49,8 +49,8 @@ class ErrorLevel
 
     private function __construct(protected readonly int $value)
     {
-        if ($this->value < -1) {
-            throw new ValueError('The value `'.$this->value.'` is invalid as a error reporting level in PHP.');
+        if ($this->value < -1 || $this->value > E_ALL) {
+            throw new ValueError('The value `'.$this->value.'` is invalid as an error reporting level in PHP.');
         }
     }
 
@@ -64,7 +64,7 @@ class ErrorLevel
         /** @var int|false $errorLevel */
         $errorLevel = array_search($name, self::LEVELS, true);
         if (false === $errorLevel) {
-            throw new ValueError('The name `'.$name.'` is invalid or unknown error reporting level name.');
+            throw new ValueError('The name `'.$name.'` is invalid or an unknown error reporting level name.');
         }
 
         return new self($errorLevel);
@@ -110,17 +110,17 @@ class ErrorLevel
             return false;
         }
 
+        $levels = array_map(fn (self|string|int $level): int => match (true) {
+            $level instanceof ErrorLevel => $level->value,
+            is_string($level) => ErrorLevel::fromName($level)->value,
+            is_int($level) => ErrorLevel::fromValue($level)->value,
+        }, $levels);
+
         if (-1 === $this->value) {
             return true;
         }
 
         foreach ($levels as $level) {
-            $level = match (true) {
-                $level instanceof ErrorLevel => $level->value,
-                is_string($level) => ErrorLevel::fromName($level)->value,
-                is_int($level) => ErrorLevel::fromValue($level)->value,
-            };
-
             if (1 > $level || $level !== ($this->value & $level)) {
                 return false;
             }
