@@ -2,8 +2,8 @@
 
 A collection of traits to avoid repeating the same methods on PHP's Enum.
 
-> [!CAUTION]
-> Sub-split of Aide for Enum helpers.
+> [!CAUTION]  
+> Sub-split of Aide for Enum helpers.  
 > ⚠️ this is a sub-split, for pull requests and issues, visit: https://github.com/bakame-php/aide
 
 ## Installation
@@ -38,7 +38,7 @@ HttpMethod::tryFrom('Put') === HttpMethod::Put
 HttpMethod::From('Unknown'); //throw a ValueError
 ```
 
-You need the `Bakame\Aide\Enum\Factory` to expose the new API.
+You need the `Bakame\Aide\Enum\Factory` trait to expose the new API.
 
 ```php
 <?php
@@ -61,7 +61,7 @@ enum HttpMethod
 
 Gather information regarding the current Enum. This trait enables getting:
 
-- the number of cases via the `count` method;
+- the number of cases via the `size` method;
 - the type of enum via the `isBacked` and `isNotBacked` method;
 - the names of each cases with the `names` method;
 - the possible values for the Enum with the `values` method;
@@ -71,7 +71,7 @@ Gather information regarding the current Enum. This trait enables getting:
 ```php
 <?php
 
-HttpMethod::count(); //returns the number of cases
+HttpMethod::size(); //returns the number of cases
 HttpMethod::isBacked();
 HttpMethod::isNotBacked(); // returns the inverse of the `isBacked` method
 HttpMethod::names(); // returns a list of all the names in the enumeration
@@ -79,7 +79,7 @@ HttpMethod::values();    // returns a list of all the names in the enumeration
 HttpMethod:namedOf(404); // returns the associative array key or null if it does not exist for the submitted value.
 ```
 
-You need the `Bakame\Aide\Enum\Info` to expose the new API.
+You need the `Bakame\Aide\Enum\Info` trait to expose the new API.
 
 ```php
 <?php
@@ -113,7 +113,7 @@ HttpMethod::hasCase('Header', 'HEAD'); //returns false;
 
 `hasValue` and `hasCase` will always return false for a Pure enumeration.
 
-You need the `Bakame\Aide\Enum\Hasser` to expose the new API.
+You need the `Bakame\Aide\Enum\Hasser` trait to expose the new API.
 
 ```php
 <?php
@@ -134,28 +134,28 @@ enum HttpMethod: string
 
 ### Comparison
 
-Last but not least we have the `Comparable` trait which adds four (4) methods to compare
+Last but not least we have the `Compare` trait which adds four (4) methods to compare
 Enums instances.
 
 ```php
 <?php
 
-HttpMethod::Get->equals(HttpMethod::Post); //returns false
-HttpMethod::Get->is('GET', 'Get', 'get');  //returns true because `Get` is present
-HttpMethod::Get->notEquals('get');         //returns true;
-HttpMethod::Get->isNot('Head');            //returns true;
+HttpMethod::Get->equals(HttpMethod::Post);      //returns false
+HttpMethod::Get->isOneOf('GET', 'Get', 'get');  //returns true because `Get` is present
+HttpMethod::Get->notEquals('get');              //returns true;
+HttpMethod::Get->isNotOneOf('Head');            //returns true;
 ```
 
-You need the `Bakame\Aide\Enum\Hasser` to expose the new API.
+You need the `Bakame\Aide\Enum\Compare` trait to expose the new API.
 
 ```php
 <?php
 
-use Bakame\Aide\Enum\Hasser;
+use Bakame\Aide\Enum\Compare;
 
 enum HttpMethod: string
 {
-    use Hasser;
+    use Compare;
 
     case Get = 'GET';
     case Post = 'POST';
@@ -168,7 +168,7 @@ enum HttpMethod: string
 ### All in one
 
 If you want to apply all the traits together just use the single one which encompass all the traits
-already mentionned `Bakame\Aide\Enum\Helper`. Once added to your enum all the methods described here
+already mentioned `Bakame\Aide\Enum\Helper`. Once added to your enum all the methods described here
 will be made available to your codebase.
 
 You need the `Bakame\Aide\Enum\Helper` to expose the new API.

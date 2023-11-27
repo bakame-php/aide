@@ -22,7 +22,7 @@ trait Info
         return !static::isBacked();
     }
 
-    public static function count(): int
+    public static function size(): int
     {
         return count(static::cases());
     }

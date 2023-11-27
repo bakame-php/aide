@@ -6,7 +6,7 @@ namespace Bakame\Aide\Enum;
 
 trait Helper
 {
-    use Comparable;
+    use Compare;
     use Info;
     use Factory;
     use Hasser;

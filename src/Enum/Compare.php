@@ -10,14 +10,14 @@ use UnitEnum;
 use function is_int;
 use function is_string;
 
-trait Comparable
+trait Compare
 {
     public function equals(mixed $value): bool
     {
         return $value instanceof UnitEnum && $value === $this;
     }
 
-    public function is(int|string|UnitEnum ...$values): bool
+    public function isOneOf(int|string|UnitEnum ...$values): bool
     {
         $type = (new ReflectionEnum($this))->getBackingType()?->getName();
 
@@ -42,8 +42,8 @@ trait Comparable
         return !$this->equals($value);
     }
 
-    public function isNot(int|string|UnitEnum ...$value): bool
+    public function isNotOneOf(int|string|UnitEnum ...$value): bool
     {
-        return !$this->is(...$value);
+        return !$this->isOneOf(...$value);
     }
 }

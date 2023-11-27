@@ -14,7 +14,7 @@ final class InfoTest extends TestCase
     {
         self::assertFalse(Direction::isBacked());
         self::assertTrue(Direction::isNotBacked());
-        self::assertSame(4, Direction::count());
+        self::assertSame(4, Direction::size());
         self::assertSame([], Direction::associative());
         self::assertSame(['Top', 'Down', 'Left', 'Right'], Direction::names());
         self::assertSame([], Direction::values());
@@ -26,7 +26,7 @@ final class InfoTest extends TestCase
     {
         self::assertTrue(Cardinal::isBacked());
         self::assertFalse(Cardinal::isNotBacked());
-        self::assertSame(4, Direction::count());
+        self::assertSame(4, Direction::size());
         self::assertSame(['North' => 'north', 'South' => 'south', 'East' => 'east', 'West' => 'west'], Cardinal::associative());
         self::assertSame(['North', 'South', 'East', 'West'], Cardinal::names());
         self::assertSame(['north', 'south', 'east', 'west'], Cardinal::values());
