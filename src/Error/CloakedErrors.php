@@ -10,7 +10,6 @@ use Iterator;
 use IteratorAggregate;
 use RuntimeException;
 
-use function array_unshift;
 use function count;
 
 /**
@@ -18,18 +17,18 @@ use function count;
  */
 final class CloakedErrors extends RuntimeException implements Countable, IteratorAggregate
 {
-    /** @var array<ErrorException> */
-    private array $errorExceptions;
-
-    public function __construct(string $message = '')
-    {
-        parent::__construct($message);
-        $this->errorExceptions = [];
+    /**
+     * @param array<ErrorException> $errors
+     */
+    public function __construct(
+        private array $errors = []
+    ) {
+        parent::__construct();
     }
 
     public function count(): int
     {
-        return count($this->errorExceptions);
+        return count($this->errors);
     }
 
     /**
@@ -37,17 +36,17 @@ final class CloakedErrors extends RuntimeException implements Countable, Iterato
      */
     public function getIterator(): Iterator
     {
-        yield from $this->errorExceptions;
+        yield from $this->errors;
     }
 
     public function unshift(ErrorException $exception): void
     {
-        array_unshift($this->errorExceptions, $exception);
+        array_unshift($this->errors, $exception);
     }
 
     public function isEmpty(): bool
     {
-        return [] === $this->errorExceptions;
+        return [] === $this->errors;
     }
 
     public function isNotEmpty(): bool
@@ -68,9 +67,9 @@ final class CloakedErrors extends RuntimeException implements Countable, Iterato
     public function get(int $offset): ?ErrorException
     {
         if ($offset < 0) {
-            $offset += count($this->errorExceptions);
+            $offset += count($this->errors);
         }
 
-        return $this->errorExceptions[$offset] ?? null;
+        return $this->errors[$offset] ?? null;
     }
 }

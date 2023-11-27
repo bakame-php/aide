@@ -2,8 +2,8 @@
 
 A collection of class to avoid repeating the same methods on PHP's Enum.
 
-> [!CAUTION]
-> Sub-split of Aide for Error.
+> [!CAUTION]  
+> Sub-split of Aide for Error.  
 > ⚠️ this is a sub-split, for pull requests and issues, visit: https://github.com/bakame-php/aide
 
 ## Installation

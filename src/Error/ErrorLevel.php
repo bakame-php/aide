@@ -7,8 +7,13 @@ namespace Bakame\Aide\Error;
 use ValueError;
 
 use function array_key_exists;
+use function array_filter;
+use function array_map;
+use function array_reduce;
 use function array_search;
+use function array_values;
 use function error_reporting;
+use function is_string;
 
 use const ARRAY_FILTER_USE_KEY;
 use const E_ALL;
@@ -48,7 +53,7 @@ class ErrorLevel
         E_USER_DEPRECATED => 'E_USER_DEPRECATED',
     ];
 
-    private function __construct(protected readonly int $value)
+    protected function __construct(protected readonly int $value)
     {
         if ($this->value < -1 || $this->value > E_ALL) {
             throw new ValueError('The value `'.$this->value.'` is invalid as an error reporting level in PHP.');
@@ -124,7 +129,7 @@ class ErrorLevel
         $levels = array_map(fn (self|string|int $level): int => match (true) {
             $level instanceof ErrorLevel => $level->value,
             is_string($level) => ErrorLevel::fromName($level)->value,
-            is_int($level) => ErrorLevel::fromValue($level)->value,
+            default => ErrorLevel::fromValue($level)->value,
         }, $levels);
 
         if (-1 === $this->value) {
