@@ -9,6 +9,21 @@ You need:
 
 - **PHP >= 8.1** but the latest stable version of PHP is recommended
 
+## Installation
+
+### Composer
+
+~~~
+composer require bakame-php/aide
+~~~
+
+### Usage
+
+Please visit the following README for more details on:
+
+- [Aide for Enums](https://github.com/bakame-php/aide-enum)
+- [Aide for Errors](https://github.com/bakame-php/aide-error)
+
 ## Testing
 
 The library has:
