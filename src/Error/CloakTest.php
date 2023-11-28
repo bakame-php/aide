@@ -35,6 +35,7 @@ final class CloakTest extends TestCase
         self::assertTrue($lambda->errorLevel()->contains(E_WARNING));
         self::assertFalse($lambda->errorLevel()->contains(E_NOTICE));
         self::assertCount(1, $lambda->errors());
+        self::assertFalse($lambda->errors()->isEmpty());
     }
 
     #[Test]
@@ -44,7 +45,8 @@ final class CloakTest extends TestCase
         $res = $lambda('foo');
 
         self::assertSame('FOO', $res);
-        self::assertCount(0, $lambda->errors());
+        self::assertTrue($lambda->errors()->isEmpty());
+        self::assertFalse($lambda->errors()->isNotEmpty());
     }
 
     public function testGetErrorReporting(): void

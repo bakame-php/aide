@@ -1,4 +1,4 @@
-# Bakame Aide for Enums
+# Aide for Enums
 
 A collection of traits to avoid repeating the same methods on PHP's Enum.
 

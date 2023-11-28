@@ -1,4 +1,4 @@
-# Bakame Aide for Errors
+# Aide for Errors
 
 A collection of class to avoid repeating the same methods on PHP's Enum.
 
