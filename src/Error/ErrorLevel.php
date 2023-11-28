@@ -32,6 +32,24 @@ use const E_USER_NOTICE;
 use const E_USER_WARNING;
 use const E_WARNING;
 
+/**
+ * @method static ErrorLevel all()
+ * @method static ErrorLevel error()
+ * @method static ErrorLevel warning()
+ * @method static ErrorLevel parse()
+ * @method static ErrorLevel notice()
+ * @method static ErrorLevel coreError()
+ * @method static ErrorLevel coreWarning()
+ * @method static ErrorLevel compileError()
+ * @method static ErrorLevel compileWarning()
+ * @method static ErrorLevel userError()
+ * @method static ErrorLevel userWarning()
+ * @method static ErrorLevel userNotice()
+ * @method static ErrorLevel strict()
+ * @method static ErrorLevel recoverableError()
+ * @method static ErrorLevel deprecated()
+ * @method static ErrorLevel userDeprecated()
+ */
 class ErrorLevel
 {
     protected const LEVELS = [
@@ -125,6 +143,18 @@ class ErrorLevel
 
             return $carry | $level;
         }, 0));
+    }
+
+    /**
+     * @param array<mixed> $arguments
+     */
+    public static function __callStatic(string $name, array $arguments = []): self
+    {
+        return self::fromName(
+            'E_'.strtoupper(
+                (string) preg_replace('/(.)(?=[A-Z])/u', '$1_', $name)
+            )
+        );
     }
 
     public function value(): int

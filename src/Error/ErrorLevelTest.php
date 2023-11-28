@@ -161,4 +161,21 @@ final class ErrorLevelTest extends TestCase
 
         ErrorLevel::fromExclusion(23);
     }
+
+    #[Test]
+    public function it_can_be_instantiate_from_its_name(): void
+    {
+        self::assertEquals(
+            ErrorLevel::fromInclusion(E_WARNING),
+            ErrorLevel::warning()
+        );
+    }
+
+    #[Test]
+    public function it_can_be_included_or_excluded(): void
+    {
+        self::assertSame(['E_ALL', 'E_WARNING'], ErrorLevel::warning()->included());
+        self::assertSame(['E_WARNING'], ErrorLevel::fromExclusion('E_WARNING')->excluded());
+
+    }
 }

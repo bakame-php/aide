@@ -23,17 +23,17 @@ You need:
 ## Usage
 
 Traditionally to correctly handle errors with PHP's functions you have two (2) options. Either
-you use the `@` to suppress the error which is not recommended or you need to add some
+you use the `@` to suppress the error which is not recommended; or you need to add some
 boilerplate code around `set_error_handler` and `restore_error_handler`.
 
-The `Bakame\Aide\Error\Cloak` utility class helps you remove that burden by doing the heavylifting for you.
+The `Bakame\Aide\Error\Cloak` utility class helps you remove that burden by doing the heavy-lifting for you.
 
 ```php
 <?php
 
 use Bakame\Aide\Error\Cloak;
 
-//using the @ suppresion operator
+//using the @ suppression operator
 $res = @touch('/foo'); // bad and not recommended
 
 //using error handler
@@ -48,7 +48,7 @@ set_error_handler(fn (int $errno, string $errstr, string $errfile = null, int $e
 $res = touch('/foo'); 
 restore_error_handler();
 // better but having to write this everytime is overkill
-// the code will always throw, but it might not be what you want!!
+// and you have little control
 
 //using Cloak
 $touch = Cloak::warning(touch(...));
@@ -56,7 +56,7 @@ $res = $touch('/foo');
 $touch->errors();
 // returns a CloakedErrors instance
 // the instance is empty on success
-// otherwise contains all the \ErrorExceptions
+// otherwise contains all the \ErrorException
 // generated during the closure execution
 ````
 
@@ -203,27 +203,27 @@ $touch = new Cloak(
 );
 ```
 
-The class contains five (5) methods to ease working with error reporting level:
+The class contains methods to ease working with error reporting level:
 
-`ErrorLevel::fromValue` allow instantiating the class with any value you want. Alternatively, you can
-instantiate the class to match your current environment settings using `ErrorLevel::fromEnvironment`.
-`ErrorLevel::fromInclusion` instantiates the error level by adding all the submitted values via a 
+- `ErrorLevel::fromValue` allow instantiating the class with any value you want. 
+- `ErrorLevel::fromName` allow instantiating the class with the string corresponding to one of the `E_*` constants.
+- `ErrorLevel::fromEnvironment` instantiates the class to match your current environment settings.
+- `ErrorLevel::fromInclusion` instantiates the error level by adding all the submitted values via a 
 bitwise `OR` operation starting at `0` meaning that no Error reporting level exists if none is added.
-Conversely `ErrorLevel::fromExclusion` does the opposite, each value given will be removed from the
-maximum value `E_ALL`.
+- `ErrorLevel::fromExclusion` does the opposite, each value given will be removed from the maximum value, represented by `E_ALL`.
 
-You can tell which error reporting is being configured using the `contains` method.
+on top of that the class expose a construct for each error reporting level via using the following syntax:
 
 ```php
-<?php
 
 use Bakame\Aide\Error\ErrorLevel;
 
-ErrorLevel::fromEnvironment()->contains(E_WARNING);
-// returns true if the current value in error_reporting contains `E_WARNING`
-// returns false otherwise.
+ErrorLevel::warning()->value(); // returns the same value as E_WARNING.
+ErrorLevel::userDeprecated()->value(); // returns the same value as E_USER_DEPRECATED.
+// and so on for each error reporting level
 ```
 
+You can tell which error reporting is being configured using the `contains` method.
 The class also provides the `excluded` and `included` methods which returns the 
 error reporting level names.
 

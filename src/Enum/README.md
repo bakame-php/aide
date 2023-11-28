@@ -59,14 +59,14 @@ enum HttpMethod
 
 ### Info
 
-Gather information regarding the current Enum. This trait enables getting:
+Gather information regarding the current Enum via **public static methods**. This trait enables getting:
 
 - the number of cases via the `size` method;
 - the type of enum via the `isBacked` and `isNotBacked` method;
 - the names of each cases with the `names` method;
 - the possible values for the Enum with the `values` method;
-- the `associative` method which returns an associative array containins the string name and their respective values;
-= the `nameOf` which returns the name associated with a specific `value`
+- the `associative` method which returns an associative array contains the string name and their respective values;
+- the `nameOf` which returns the name associated with a specific `value`
 
 ```php
 <?php

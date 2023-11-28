@@ -124,7 +124,7 @@ final class CloakTest extends TestCase
     }
 
     #[Test]
-    public function it_can_collection_all_errors(): void
+    public function it_can_collection_all_errors_if_errors_are_silenced(): void
     {
         $closure = function (string $path): array|false {
             touch($path);
@@ -143,6 +143,25 @@ final class CloakTest extends TestCase
 
         self::assertStringContainsString('touch(): Unable to create file /foobar because', $errors->first()?->getMessage() ?? '');
         self::assertSame('file(/foobar): Failed to open stream: No such file or directory', $errors->last()?->getMessage() ?? '');
+    }
+
+    #[Test]
+    public function it_throws_with_the_first_error_if_errors_are_thrown(): void
+    {
+        $closure = function (string $path): array|false {
+            touch($path);
+
+            return file($path);
+        };
+
+        try {
+            $lambda = Cloak::warning($closure, Cloak::THROW);
+            $lambda('/foobar');
+            self::fail(CloakedErrors::class.' was not thrown');
+        } catch (CloakedErrors $cloakedErrors) {
+            self::assertCount(1, $cloakedErrors);
+            self::assertStringContainsString('touch(): Unable to create file /foobar because', $cloakedErrors->first()?->getMessage() ?? '');
+        }
     }
 
     #[Test]
