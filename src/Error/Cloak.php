@@ -94,7 +94,7 @@ class Cloak
         return new self($closure, $onError, 'E_ALL');
     }
 
-    protected function errorHandler(int $errno, string $errstr, string $errfile, int $errline): bool
+    protected function errorHandler(int $errno, string $errstr, string $errfile = null, int $errline = null): bool
     {
         if (ErrorLevel::fromEnvironment()->doesNotContain($errno)) {
             return false;

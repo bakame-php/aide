@@ -33,19 +33,27 @@ The `Bakame\Aide\Error\Cloak` utility class helps you remove that burden by doin
 
 use Bakame\Aide\Error\Cloak;
 
-//before
+//using the @ suppresion operator
 $res = @touch('/foo'); // bad and not recommended
 
-set_error_handler(fn (int $errno, string $errstr, string $errfile, int $errline) => true);
+//using error handler
+set_error_handler(fn (int $errno, string $errstr, string $errfile = null, int $errline = null) {
+    if (!(error_reporting() & $errno)) {
+        // This error code is not included in error_reporting
+        return;
+    }
+
+    throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+}, E_WARNING);
 $res = touch('/foo'); 
 restore_error_handler();
-// better but you lost some information in case of error
-// having to write this everytime is overkill
+// better but having to write this everytime is overkill
+// the code will always throw, but it might not be what you want!!
 
 //using Cloak
-$touch = Cloak::all(touch(...));
+$touch = Cloak::warning(touch(...));
 $res = $touch('/foo');
-$touch->errors(); //returns a CloakedErrors
+$touch->errors();
 // returns a CloakedErrors instance
 // the instance is empty on success
 // otherwise contains all the \ErrorExceptions
@@ -75,10 +83,10 @@ Or you can decide to specifically change its default behaviour for a specific ca
 
 use Bakame\Aide\Error\Cloak;
 
-Cloak::throwOnError(); // by default calls via Cloack should throw
+Cloak::throwOnError(); // by default calls via Cloak should throw
 
 if (!$touch = Cloak::warning(touch(...), Cloak::SILENT)) {
-    // errors are still available via the `errors` methpd
+    // errors are still available via the `errors` method
     // but throwing will not happen
     $touch->errors();
 }
@@ -96,6 +104,8 @@ specific error is included you can do the following:
 $touch = Cloak::all(touch(...));
 $touch->errorLevel()->contains(E_WARNING);  //tells if the E_WARNING is included or not
 ```
+
+The method returns an `Bakame\Aide\Error\ErrorLevel` instance which is documented below.
 
 ### Accessing the error
 
@@ -177,7 +187,9 @@ $touch = new Cloak(
 );
 ```
 
-The code above can be rewritten using the `ErrorLevel` class which ships with the package:
+### ErrorLevel class
+
+The previous code example can be rewritten using the `ErrorLevel` class which ships with the package:
 
 ```php
 <?php
