@@ -6,10 +6,8 @@ namespace Bakame\Aide\Error;
 
 use Closure;
 use ErrorException;
-
 use ValueError;
 
-use function error_reporting;
 use function restore_error_handler;
 use function set_error_handler;
 
@@ -21,8 +19,8 @@ class Cloak
 
     protected static bool $useException = false;
 
-    protected CloakedErrors $errors;
     protected readonly ErrorLevel $errorLevel;
+    protected CloakedErrors $errors;
 
     /**
      * @throws ValueError
@@ -96,24 +94,25 @@ class Cloak
         return new self($closure, $onError, 'E_ALL');
     }
 
+    protected function errorHandler(int $errno, string $errstr, string $errfile, int $errline): bool
+    {
+        if (ErrorLevel::fromEnvironment()->doesNotContain($errno)) {
+            return false;
+        }
+
+        $this->errors->unshift(new ErrorException($errstr, 0, $errno, $errfile, $errline));
+
+        return true;
+    }
+
     /**
      * @throws CloakedErrors
      */
     public function __invoke(mixed ...$arguments): mixed
     {
         $this->errors = new CloakedErrors();
-        $errorHandler = function (int $errno, string $errstr, string $errfile, int $errline): bool {
-            if (0 === (error_reporting() & $errno)) {
-                return false;
-            }
-
-            $this->errors->unshift(new ErrorException($errstr, 0, $errno, $errfile, $errline));
-
-            return true;
-        };
-
         try {
-            set_error_handler($errorHandler, $this->errorLevel->value());
+            set_error_handler($this->errorHandler(...), $this->errorLevel->value());
             $result = ($this->closure)(...$arguments);
         } finally {
             restore_error_handler();

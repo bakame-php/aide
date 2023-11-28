@@ -6,8 +6,8 @@ namespace Bakame\Aide\Error;
 
 use ValueError;
 
-use function array_key_exists;
 use function array_filter;
+use function array_key_exists;
 use function array_map;
 use function array_reduce;
 use function array_search;
@@ -60,11 +60,17 @@ class ErrorLevel
         }
     }
 
+    /**
+     * Returns a new instance by using the error reporting level value.
+     */
     public static function fromValue(int $value): self
     {
         return new self($value);
     }
 
+    /**
+     * Returns a new instance by using the error reporting level constant name.
+     */
     public static function fromName(string $name): self
     {
         /** @var int|false $errorLevel */
@@ -81,6 +87,9 @@ class ErrorLevel
         return new self(error_reporting());
     }
 
+    /**
+     * Returns a new instance by excluded error levels from E_ALL.
+     */
     public static function fromExclusion(self|string|int ...$levels): self
     {
         return new self(array_reduce($levels, function (int $carry, self|string|int $level) {
@@ -98,6 +107,9 @@ class ErrorLevel
         }, E_ALL));
     }
 
+    /**
+     * Returns a new instance by adding error levels from the initial no error reporting level.
+     */
     public static function fromInclusion(self|string|int ...$levels): self
     {
         return new self(array_reduce($levels, function (int $carry, self|string|int $level) {
@@ -118,6 +130,11 @@ class ErrorLevel
     public function value(): int
     {
         return $this->value;
+    }
+
+    public function doesNotContain(self|string|int ...$levels): bool
+    {
+        return !$this->contains(...$levels);
     }
 
     public function contains(self|string|int ...$levels): bool

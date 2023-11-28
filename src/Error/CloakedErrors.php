@@ -17,13 +17,14 @@ use function count;
  */
 final class CloakedErrors extends RuntimeException implements Countable, IteratorAggregate
 {
-    /**
-     * @param array<ErrorException> $errors
-     */
-    public function __construct(
-        private array $errors = []
-    ) {
+    /** @var array<ErrorException>  */
+    private array $errors;
+
+    public function __construct(ErrorException ...$errors)
+    {
         parent::__construct();
+
+        $this->errors = $errors;
     }
 
     public function count(): int

@@ -195,12 +195,25 @@ The class contains five (5) methods to ease working with error reporting level:
 
 `ErrorLevel::fromValue` allow instantiating the class with any value you want. Alternatively, you can
 instantiate the class to match your current environment settings using `ErrorLevel::fromEnvironment`.
-`ErrorLevel::fromInclusion` instantiate the error level by adding all the submitted values via a 
+`ErrorLevel::fromInclusion` instantiates the error level by adding all the submitted values via a 
 bitwise `OR` operation starting at `0` meaning that no Error reporting level exists if none is added.
-Conversely `ErrorLevel::fromExclusion` does the opposite, each value given will be remove from the
+Conversely `ErrorLevel::fromExclusion` does the opposite, each value given will be removed from the
 maximum value `E_ALL`.
 
-Last but not least you can tell which error reporting is being configured using the `contains` method.
+You can tell which error reporting is being configured using the `contains` method.
+
+```php
+<?php
+
+use Bakame\Aide\Error\ErrorLevel;
+
+ErrorLevel::fromEnvironment()->contains(E_WARNING);
+// returns true if the current value in error_reporting contains `E_WARNING`
+// returns false otherwise.
+```
+
+The class also provides the `excluded` and `included` methods which returns the 
+error reporting level names.
 
 ```php
 <?php
@@ -211,9 +224,18 @@ ErrorLevel::fromEnvironment()->contains(E_WARNING);
 // returns true if the current value in error_reporting contains `E_WARNING`
 // returns false otherwise.
 
- $errorLevel = ErrorLevel::fromExclusion(E_NOTICE, E_DEPRECATED)->value();
+$errorLevel = ErrorLevel::fromInclusion(E_NOTICE, "E_DEPRECATED");
+ 
+$errorLevel->value();
 // `value` returns the int value corresponding to the calculated error level.
 //  the errorLevel calculated will ignore notice, and deprecated error.
+
+$errorLevel->excluded(); 
+// returns all the error reporting level name no present in the current error Level
+
+$errorLevel->included(); 
+// returns all the error reporting level name present in the current error Level
+// ["E_NOTICE", "E_DEPRECATED"]
 ```
 
 ## Credits
