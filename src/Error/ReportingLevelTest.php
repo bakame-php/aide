@@ -15,13 +15,13 @@ use const E_DEPRECATED;
 use const E_NOTICE;
 use const E_WARNING;
 
-final class ErrorLevelTest extends TestCase
+final class ReportingLevelTest extends TestCase
 {
     #[Test]
     #[DataProvider('provideErrorLevelContains')]
     public function it_can_tell_wether_the_error_level_is_contained(int $errorLevel, int|string $test, bool $expected): void
     {
-        self::assertSame($expected, ErrorLevel::fromValue($errorLevel)->contains($test));
+        self::assertSame($expected, ReportingLevel::fromValue($errorLevel)->contains($test));
     }
 
     /**
@@ -82,8 +82,8 @@ final class ErrorLevelTest extends TestCase
     public function it_can_create_error_level_by_exclusion(): void
     {
         self::assertSame(
-            ErrorLevel::fromExclusion(E_WARNING, 'E_WARNING')->value(),
-            ErrorLevel::fromValue(E_ALL & ~E_WARNING)->value(),
+            ReportingLevel::fromExclusion(E_WARNING, 'E_WARNING')->value(),
+            ReportingLevel::fromValue(E_ALL & ~E_WARNING)->value(),
         );
     }
 
@@ -91,8 +91,8 @@ final class ErrorLevelTest extends TestCase
     public function it_can_create_error_level_from_environment(): void
     {
         self::assertSame(
-            ErrorLevel::fromEnvironment()->value(),
-            ErrorLevel::fromValue(error_reporting())->value(),
+            ReportingLevel::fromEnv()->value(),
+            ReportingLevel::fromValue(error_reporting())->value(),
         );
     }
 
@@ -100,8 +100,8 @@ final class ErrorLevelTest extends TestCase
     public function it_can_create_error_level_by_inclusion(): void
     {
         self::assertSame(
-            ErrorLevel::fromInclusion(E_WARNING, 'E_WARNING')->value(),
-            ErrorLevel::fromValue(E_WARNING)->value(),
+            ReportingLevel::fromInclusion(E_WARNING, 'E_WARNING')->value(),
+            ReportingLevel::fromValue(E_WARNING)->value(),
         );
     }
 
@@ -110,7 +110,7 @@ final class ErrorLevelTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        ErrorLevel::fromExclusion(-2, 'E_WARNING')->value();
+        ReportingLevel::fromExclusion(-2, 'E_WARNING')->value();
     }
 
     #[Test]
@@ -118,15 +118,15 @@ final class ErrorLevelTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        ErrorLevel::fromInclusion(-2, 'E_FOOBAR')->value();
+        ReportingLevel::fromInclusion(-2, 'E_FOOBAR')->value();
     }
 
     #[Test]
     public function it_can_create_error_level_by_name(): void
     {
         self::assertSame(
-            ErrorLevel::fromName('E_WARNING')->value(),
-            ErrorLevel::fromValue(E_WARNING)->value(),
+            ReportingLevel::fromName('E_WARNING')->value(),
+            ReportingLevel::fromValue(E_WARNING)->value(),
         );
     }
 
@@ -135,7 +135,7 @@ final class ErrorLevelTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        ErrorLevel::fromName('E_FOOBAR');
+        ReportingLevel::fromName('E_FOOBAR');
     }
 
     #[Test]
@@ -143,7 +143,7 @@ final class ErrorLevelTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        ErrorLevel::fromValue(-2);
+        ReportingLevel::fromValue(-2);
     }
 
     #[Test]
@@ -151,7 +151,7 @@ final class ErrorLevelTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        ErrorLevel::fromInclusion(23);
+        ReportingLevel::fromInclusion(23);
     }
 
     #[Test]
@@ -159,23 +159,23 @@ final class ErrorLevelTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        ErrorLevel::fromExclusion(23);
+        ReportingLevel::fromExclusion(23);
     }
 
     #[Test]
     public function it_can_be_instantiate_from_its_name(): void
     {
         self::assertEquals(
-            ErrorLevel::fromInclusion(E_WARNING),
-            ErrorLevel::warning()
+            ReportingLevel::fromInclusion(E_WARNING),
+            ReportingLevel::warning()
         );
     }
 
     #[Test]
     public function it_can_be_included_or_excluded(): void
     {
-        self::assertSame(['E_ALL', 'E_WARNING'], ErrorLevel::warning()->included());
-        self::assertSame(['E_WARNING'], ErrorLevel::fromExclusion('E_WARNING')->excluded());
+        self::assertSame(['E_ALL', 'E_WARNING'], ReportingLevel::warning()->included());
+        self::assertSame(['E_WARNING'], ReportingLevel::fromExclusion('E_WARNING')->excluded());
 
     }
 }

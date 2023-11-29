@@ -33,24 +33,24 @@ use const E_USER_WARNING;
 use const E_WARNING;
 
 /**
- * @method static ErrorLevel all()
- * @method static ErrorLevel error()
- * @method static ErrorLevel warning()
- * @method static ErrorLevel parse()
- * @method static ErrorLevel notice()
- * @method static ErrorLevel coreError()
- * @method static ErrorLevel coreWarning()
- * @method static ErrorLevel compileError()
- * @method static ErrorLevel compileWarning()
- * @method static ErrorLevel userError()
- * @method static ErrorLevel userWarning()
- * @method static ErrorLevel userNotice()
- * @method static ErrorLevel strict()
- * @method static ErrorLevel recoverableError()
- * @method static ErrorLevel deprecated()
- * @method static ErrorLevel userDeprecated()
+ * @method static ReportingLevel all()
+ * @method static ReportingLevel error()
+ * @method static ReportingLevel warning()
+ * @method static ReportingLevel parse()
+ * @method static ReportingLevel notice()
+ * @method static ReportingLevel coreError()
+ * @method static ReportingLevel coreWarning()
+ * @method static ReportingLevel compileError()
+ * @method static ReportingLevel compileWarning()
+ * @method static ReportingLevel userError()
+ * @method static ReportingLevel userWarning()
+ * @method static ReportingLevel userNotice()
+ * @method static ReportingLevel strict()
+ * @method static ReportingLevel recoverableError()
+ * @method static ReportingLevel deprecated()
+ * @method static ReportingLevel userDeprecated()
  */
-class ErrorLevel
+class ReportingLevel
 {
     protected const LEVELS = [
         E_ALL => 'E_ALL',
@@ -100,7 +100,7 @@ class ErrorLevel
         return new self($errorLevel);
     }
 
-    public static function fromEnvironment(): self
+    public static function fromEnv(): self
     {
         return new self(error_reporting());
     }
@@ -112,9 +112,9 @@ class ErrorLevel
     {
         return new self(array_reduce($levels, function (int $carry, self|string|int $level) {
             $level = match (true) {
-                $level instanceof ErrorLevel => $level->value,
-                is_string($level) => ErrorLevel::fromName($level)->value,
-                default => ErrorLevel::fromValue($level)->value,
+                $level instanceof ReportingLevel => $level->value,
+                is_string($level) => ReportingLevel::fromName($level)->value,
+                default => ReportingLevel::fromValue($level)->value,
             };
 
             if (!array_key_exists($level, self::LEVELS)) {
@@ -132,9 +132,9 @@ class ErrorLevel
     {
         return new self(array_reduce($levels, function (int $carry, self|string|int $level) {
             $level = match (true) {
-                $level instanceof ErrorLevel => $level->value,
-                is_string($level) => ErrorLevel::fromName($level)->value,
-                default => ErrorLevel::fromValue($level)->value,
+                $level instanceof ReportingLevel => $level->value,
+                is_string($level) => ReportingLevel::fromName($level)->value,
+                default => ReportingLevel::fromValue($level)->value,
             };
 
             if (!array_key_exists($level, self::LEVELS)) {
@@ -174,9 +174,9 @@ class ErrorLevel
         }
 
         $levels = array_map(fn (self|string|int $level): int => match (true) {
-            $level instanceof ErrorLevel => $level->value,
-            is_string($level) => ErrorLevel::fromName($level)->value,
-            default => ErrorLevel::fromValue($level)->value,
+            $level instanceof ReportingLevel => $level->value,
+            is_string($level) => ReportingLevel::fromName($level)->value,
+            default => ReportingLevel::fromValue($level)->value,
         }, $levels);
 
         if (-1 === $this->value) {

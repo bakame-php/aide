@@ -66,13 +66,12 @@ You can control its behaviour on your global codebase
 <?php
 
 use Bakame\Aide\Error\Cloak;
-use Bakame\Aide\Error\CloakedErrors;
 
 Cloak::throwOnError();
 
 try {
     $touch = Cloak::warning(touch(...));
-} catch (CloakedErrors $exception)
+} catch (ErrorException $exception)
 }
 ````
 
@@ -102,10 +101,10 @@ specific error is included you can do the following:
 
 ```php
 $touch = Cloak::all(touch(...));
-$touch->errorLevel()->contains(E_WARNING);  //tells if the E_WARNING is included or not
+$touch->reportingLevel()->contains(E_WARNING);  //tells if the E_WARNING is included or not
 ```
 
-The method returns an `Bakame\Aide\Error\ErrorLevel` instance which is documented below.
+The method returns an `Bakame\Aide\Error\ReportingLevel` instance which is documented below.
 
 ### Accessing the error
 
@@ -145,12 +144,14 @@ The class general behaviour is controlled by two (2) static method:
 
 ### Named constructors
 
-To ease usage the following named constructors are added:
+To ease usage the named constructors are added:
 
 ```php
 <?php
 use Bakame\Aide\Error\Cloak;
 
+Cloak::env(); // will use the current environment error reporting value
+// and one for each error reporting level that exists in PHP
 Cloak::all();
 Cloak::warning();
 Cloak::notice();
@@ -158,20 +159,21 @@ Cloak::deprecated();
 Cloak::userWarning();
 Cloak::userNotice();
 Cloak::userDeprecated();
-Cloak::fromEnvironment(); // will use the current environment error reporting value
+// some Error reporting will never get triggered
+// they exist for completeness but won't be usable.
 ```
 
 They all share the same signature:
 
 ```php
-static method(Closure $closure, int $onError = Cloak::FOLLOW_ENV);
+static method(Closure $closure, int $onError = Cloak::OBEY);
 ```
 
 the `$onError` argument is used to tweak the instance behaviour on error:
 
 - `Cloak::THROW` will override the general behaviour and force throwing an exception if available
 - `Cloak::SILENT` will override the general behaviour and silence the error if it exists
-- `Cloak::FOLLOW_ENV` will comply with the general behaviour.
+- `Cloak::OBEY` will comply with the environment behaviour.
 
 If you really need other fined grained error level you can still use the constructor
 as shown below:
@@ -187,39 +189,39 @@ $touch = new Cloak(
 );
 ```
 
-### ErrorLevel class
+### ReportingLevel class
 
-The previous code example can be rewritten using the `ErrorLevel` class which ships with the package:
+The previous code example can be rewritten using the `ReportingLevel` class which ships with the package:
 
 ```php
 <?php
 use Bakame\Aide\Error\Cloak;
-use Bakame\Aide\Error\ErrorLevel;
+use Bakame\Aide\Error\ReportingLevel;
 
 $touch = new Cloak(
     touch(...),
     Cloak::THROW,
-    ErrorLevel::fromExclusion(E_NOTICE, E_STRICT, E_DEPRECATED)
+    ReportingLevel::fromExclusion(E_NOTICE, E_STRICT, E_DEPRECATED)
 );
 ```
 
 The class contains methods to ease working with error reporting level:
 
-- `ErrorLevel::fromValue` allow instantiating the class with any value you want. 
-- `ErrorLevel::fromName` allow instantiating the class with the string corresponding to one of the `E_*` constants.
-- `ErrorLevel::fromEnvironment` instantiates the class to match your current environment settings.
-- `ErrorLevel::fromInclusion` instantiates the error level by adding all the submitted values via a 
+- `ReportingLevel::fromValue` allow instantiating the class with any value you want. 
+- `ReportingLevel::fromName` allow instantiating the class with the string corresponding to one of the `E_*` constants.
+- `ReportingLevel::fromEnv` instantiates the class to match your current environment settings.
+- `ReportingLevel::fromInclusion` instantiates the error level by adding all the submitted values via a 
 bitwise `OR` operation starting at `0` meaning that no Error reporting level exists if none is added.
-- `ErrorLevel::fromExclusion` does the opposite, each value given will be removed from the maximum value, represented by `E_ALL`.
+- `ReportingLevel::fromExclusion` does the opposite, each value given will be removed from the maximum value, represented by `E_ALL`.
 
 on top of that the class expose a construct for each error reporting level via using the following syntax:
 
 ```php
 
-use Bakame\Aide\Error\ErrorLevel;
+use Bakame\Aide\Error\ReportingLevel;
 
-ErrorLevel::warning()->value(); // returns the same value as E_WARNING.
-ErrorLevel::userDeprecated()->value(); // returns the same value as E_USER_DEPRECATED.
+ReportingLevel::warning()->value(); // returns the same value as E_WARNING.
+ReportingLevel::userDeprecated()->value(); // returns the same value as E_USER_DEPRECATED.
 // and so on for each error reporting level
 ```
 
@@ -230,22 +232,22 @@ error reporting level names.
 ```php
 <?php
 
-use Bakame\Aide\Error\ErrorLevel;
+use Bakame\Aide\Error\ReportingLevel;
 
-ErrorLevel::fromEnvironment()->contains(E_WARNING);
+ReportingLevel::fromEnv()->contains(E_WARNING);
 // returns true if the current value in error_reporting contains `E_WARNING`
 // returns false otherwise.
 
-$errorLevel = ErrorLevel::fromInclusion(E_NOTICE, "E_DEPRECATED");
+$reportingLevel = ReportingLevel::fromInclusion(E_NOTICE, "E_DEPRECATED");
  
-$errorLevel->value();
+$reportingLevel->value();
 // `value` returns the int value corresponding to the calculated error level.
 //  the errorLevel calculated will ignore notice, and deprecated error.
 
-$errorLevel->excluded(); 
+$reportingLevel->excluded(); 
 // returns all the error reporting level name no present in the current error Level
 
-$errorLevel->included(); 
+$reportingLevel->included(); 
 // returns all the error reporting level name present in the current error Level
 // ["E_NOTICE", "E_DEPRECATED"]
 ```

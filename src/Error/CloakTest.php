@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bakame\Aide\Error;
 
+use ErrorException;
 use Exception;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -32,8 +33,8 @@ final class CloakTest extends TestCase
         $res = $lambda('/foo');
 
         self::assertFalse($res);
-        self::assertTrue($lambda->errorLevel()->contains(E_WARNING));
-        self::assertFalse($lambda->errorLevel()->contains(E_NOTICE));
+        self::assertTrue($lambda->reportingLevel()->contains(E_WARNING));
+        self::assertFalse($lambda->reportingLevel()->contains(E_NOTICE));
         self::assertCount(1, $lambda->errors());
         self::assertFalse($lambda->errors()->isEmpty());
     }
@@ -53,7 +54,7 @@ final class CloakTest extends TestCase
     {
         $lambda = Cloak::deprecated(strtoupper(...));
 
-        self::assertTrue($lambda->errorLevel()->contains(E_DEPRECATED));
+        self::assertTrue($lambda->reportingLevel()->contains(E_DEPRECATED));
     }
 
     public function testCapturesTriggeredError(): void
@@ -74,7 +75,7 @@ final class CloakTest extends TestCase
 
     public function testErrorTransformedIntoARuntimeException(): void
     {
-        $this->expectException(CloakedErrors::class);
+        $this->expectException(ErrorException::class);
 
         Cloak::throwOnError();
         $touch = Cloak::warning(touch(...));
@@ -84,7 +85,7 @@ final class CloakTest extends TestCase
     public function testErrorTransformedIntoAnInvalidArgumentException(): void
     {
         Cloak::throwOnError();
-        $this->expectException(CloakedErrors::class);
+        $this->expectException(ErrorException::class);
 
         $touch = Cloak::all(touch(...));
         $touch('/foo');
@@ -116,7 +117,7 @@ final class CloakTest extends TestCase
             E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
         );
 
-        $errorLevel = $touch->errorLevel();
+        $errorLevel = $touch->reportingLevel();
 
         self::assertFalse($errorLevel->contains(E_NOTICE));
         self::assertTrue($touch->errorsAreThrown());
@@ -157,10 +158,9 @@ final class CloakTest extends TestCase
         try {
             $lambda = Cloak::warning($closure, Cloak::THROW);
             $lambda('/foobar');
-            self::fail(CloakedErrors::class.' was not thrown');
-        } catch (CloakedErrors $cloakedErrors) {
-            self::assertCount(1, $cloakedErrors);
-            self::assertStringContainsString('touch(): Unable to create file /foobar because', $cloakedErrors->first()?->getMessage() ?? '');
+            self::fail(ErrorException::class.' was not thrown');
+        } catch (ErrorException $cloakedErrors) {
+            self::assertStringContainsString('touch(): Unable to create file /foobar because', $cloakedErrors->getMessage());
         }
     }
 
@@ -176,9 +176,9 @@ final class CloakTest extends TestCase
     #[Test]
     public function it_does_use_the_current_error_reporting_level(): void
     {
-        $lambda = Cloak::fromEnvironment(fn () => true, Cloak::SILENT);
+        $lambda = Cloak::env(fn () => true, Cloak::SILENT);
         $lambda();
-        self::assertSame($lambda->errorLevel()->value(), ErrorLevel::fromEnvironment()->value());
+        self::assertSame($lambda->reportingLevel()->value(), ReportingLevel::fromEnv()->value());
     }
 
     #[Test]

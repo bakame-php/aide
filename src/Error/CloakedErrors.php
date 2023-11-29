@@ -8,22 +8,19 @@ use Countable;
 use ErrorException;
 use Iterator;
 use IteratorAggregate;
-use RuntimeException;
 
 use function count;
 
 /**
  * @implements IteratorAggregate<int, ErrorException>
  */
-final class CloakedErrors extends RuntimeException implements Countable, IteratorAggregate
+class CloakedErrors implements Countable, IteratorAggregate
 {
     /** @var array<ErrorException>  */
     private array $errors;
 
     public function __construct(ErrorException ...$errors)
     {
-        parent::__construct();
-
         $this->errors = $errors;
     }
 
@@ -43,6 +40,11 @@ final class CloakedErrors extends RuntimeException implements Countable, Iterato
     public function unshift(ErrorException $exception): void
     {
         array_unshift($this->errors, $exception);
+    }
+
+    public function reset(): void
+    {
+        $this->errors = [];
     }
 
     public function isEmpty(): bool
