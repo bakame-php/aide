@@ -93,19 +93,6 @@ if (!$touch = Cloak::warning(touch(...), Cloak::SILENT)) {
 
 ## Available properties and methods
 
-### Accessing the Error Reporting Level
-
-Once instantiated, you can always access the error reporting level via
-the `errorLevel` method. For instance if you need to know if a 
-specific error is included you can do the following:
-
-```php
-$touch = Cloak::all(touch(...));
-$touch->reportingLevel()->contains(E_WARNING);  //tells if the E_WARNING is included or not
-```
-
-The method returns an `Bakame\Aide\Error\ReportingLevel` instance which is documented below.
-
 ### Accessing the error
 
 To access the errors store in the instance you need to call the `Cloak::errors` method
@@ -166,7 +153,7 @@ Cloak::userDeprecated();
 They all share the same signature:
 
 ```php
-static method(Closure $closure, int $onError = Cloak::OBEY);
+static method(Closure $closure, int $onError = Cloak::OBEY, LoggerInterface $logger = null);
 ```
 
 the `$onError` argument is used to tweak the instance behaviour on error:
@@ -174,6 +161,8 @@ the `$onError` argument is used to tweak the instance behaviour on error:
 - `Cloak::THROW` will override the general behaviour and force throwing an exception if available
 - `Cloak::SILENT` will override the general behaviour and silence the error if it exists
 - `Cloak::OBEY` will comply with the environment behaviour.
+
+You can also give it a PSR compliant logger so that the error gets automatically logged.
 
 If you really need other fined grained error level you can still use the constructor
 as shown below:
@@ -185,9 +174,11 @@ use Bakame\Aide\Error\Cloak;
 $touch = new Cloak(
     touch(...),
     Cloak::THROW,
-    E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
+    E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED,
 );
 ```
+
+*The PSR compliant logger can also be given to the constructor*
 
 ### ReportingLevel class
 
@@ -201,7 +192,7 @@ use Bakame\Aide\Error\ReportingLevel;
 $touch = new Cloak(
     touch(...),
     Cloak::THROW,
-    ReportingLevel::fromExclusion(E_NOTICE, E_STRICT, E_DEPRECATED)
+    ReportingLevel::fromExclusion(E_NOTICE, E_STRICT, E_DEPRECATED),
 );
 ```
 
@@ -250,6 +241,17 @@ $reportingLevel->excluded();
 $reportingLevel->included(); 
 // returns all the error reporting level name present in the current error Level
 // ["E_NOTICE", "E_DEPRECATED"]
+```
+
+### Accessing the Error Reporting Level
+
+Once instantiated, you can always access the error reporting level via
+the `errorLevel` method on a `Cloak` instance. For example, if you need to know if a
+specific error is included you can do the following:
+
+```php
+$touch = Cloak::all(touch(...));
+$touch->reportingLevel()->contains(E_WARNING);  //tells if the E_WARNING is included or not
 ```
 
 ## Credits

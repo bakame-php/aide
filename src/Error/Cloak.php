@@ -7,6 +7,7 @@ namespace Bakame\Aide\Error;
 use ArgumentCountError;
 use Closure;
 use ErrorException;
+use Psr\Log\LoggerInterface;
 use ValueError;
 
 use function in_array;
@@ -50,7 +51,8 @@ class Cloak
     public function __construct(
         protected readonly Closure $closure,
         protected readonly int $onError = self::OBEY,
-        ReportingLevel|string|int|null $reportingLevel = null
+        ReportingLevel|string|int|null $reportingLevel = null,
+        protected readonly ?LoggerInterface $logger = null
     ) {
         if (!in_array($this->onError, [self::SILENT, self::THROW, self::OBEY], true)) {
             throw new ValueError('The `onError` value is invalid; expect one of the `'.self::class.'` constants.');
@@ -110,7 +112,9 @@ class Cloak
         }
 
         $this->errors->unshift(new ErrorException($errstr, 0, $errno, $errfile, $errline));
-
+        $this->logger?->error('An error occurred during execution of the closure attach to a `'.self::class.'` instance.', [
+            'exception' => $this->errors->last(),
+        ]);
         return $this->errorsAreThrown() ? throw $this->errors->last() : true;
     }
 
@@ -124,19 +128,27 @@ class Cloak
         self::$useException = false;
     }
 
-    public static function env(Closure $closure, int $onError = self::OBEY): self
-    {
-        return new self($closure, $onError);
+    public static function env(
+        Closure $closure,
+        int $onError = self::OBEY,
+        ?LoggerInterface $logger = null
+    ): self {
+        return new self($closure, $onError, ReportingLevel::fromEnv(), $logger);
     }
 
     /**
-     * @param array{0:Closure, 1:self::OBEY|self::SILENT|self::THROW|null} $arguments
+     * @param array{0:Closure, 1:self::OBEY|self::SILENT|self::THROW|null, 2:LoggerInterface|null} $arguments
      */
     public static function __callStatic(string $name, array $arguments): self
     {
         return match (true) {
             1 > count($arguments) => throw new ArgumentCountError('The method expects at least 1 argument; '.count($arguments).' was given.'),
-            default => new self($arguments[0], $arguments[1] ?? self::OBEY, ReportingLevel::__callStatic($name)),
+            default => new self(
+                $arguments[0],
+                $arguments[1] ?? self::OBEY,
+                ReportingLevel::__callStatic($name),
+                $arguments[2] ?? null
+            ),
         };
     }
 }
