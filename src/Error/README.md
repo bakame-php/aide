@@ -153,7 +153,7 @@ Cloak::userDeprecated();
 They all share the same signature:
 
 ```php
-static method(Closure $closure, int $onError = Cloak::OBEY, LoggerInterface $logger = null);
+static method(Closure $closure, int $onError = Cloak::OBEY);
 ```
 
 the `$onError` argument is used to tweak the instance behaviour on error:
@@ -161,8 +161,6 @@ the `$onError` argument is used to tweak the instance behaviour on error:
 - `Cloak::THROW` will override the general behaviour and force throwing an exception if available
 - `Cloak::SILENT` will override the general behaviour and silence the error if it exists
 - `Cloak::OBEY` will comply with the environment behaviour.
-
-You can also give it a PSR compliant logger so that the error gets automatically logged.
 
 If you really need other fined grained error level you can still use the constructor
 as shown below:
@@ -177,8 +175,6 @@ $touch = new Cloak(
     E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED,
 );
 ```
-
-*The PSR compliant logger can also be given to the constructor*
 
 ### ReportingLevel class
 

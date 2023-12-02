@@ -18,8 +18,14 @@ use const E_WARNING;
 final class ReportingLevelTest extends TestCase
 {
     #[Test]
+    public function it_tells_nothing_is_contains_if_nothing_is_given_to_the_method(): void
+    {
+        self::assertFalse(ReportingLevel::fromEnv()->contains());
+    }
+
+    #[Test]
     #[DataProvider('provideErrorLevelContains')]
-    public function it_can_tell_wether_the_error_level_is_contained(int $errorLevel, int|string $test, bool $expected): void
+    public function it_can_tell_whether_the_error_level_is_contained(int $errorLevel, int|string $test, bool $expected): void
     {
         self::assertSame($expected, ReportingLevel::fromValue($errorLevel)->contains($test));
     }

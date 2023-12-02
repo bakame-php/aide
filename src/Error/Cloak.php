@@ -7,7 +7,6 @@ namespace Bakame\Aide\Error;
 use ArgumentCountError;
 use Closure;
 use ErrorException;
-use Psr\Log\LoggerInterface;
 use ValueError;
 
 use function in_array;
@@ -51,8 +50,7 @@ class Cloak
     public function __construct(
         protected readonly Closure $closure,
         protected readonly int $onError = self::OBEY,
-        ReportingLevel|string|int|null $reportingLevel = null,
-        protected readonly ?LoggerInterface $logger = null
+        ReportingLevel|string|int|null $reportingLevel = null
     ) {
         if (!in_array($this->onError, [self::SILENT, self::THROW, self::OBEY], true)) {
             throw new ValueError('The `onError` value is invalid; expect one of the `'.self::class.'` constants.');
@@ -89,9 +87,6 @@ class Cloak
             || (self::OBEY === $this->onError && true === self::$useException);
     }
 
-    /**
-     * @throws ErrorException
-     */
     public function __invoke(mixed ...$arguments): mixed
     {
         $this->errors->reset();
@@ -105,6 +100,9 @@ class Cloak
         return $result;
     }
 
+    /**
+     * @throws ErrorException
+     */
     protected function errorHandler(int $errno, string $errstr, string $errfile = null, int $errline = null): bool
     {
         if (ReportingLevel::fromEnv()->doesNotContain($errno)) {
@@ -112,9 +110,7 @@ class Cloak
         }
 
         $this->errors->unshift(new ErrorException($errstr, 0, $errno, $errfile, $errline));
-        $this->logger?->error('An error occurred during execution of the closure attach to a `'.self::class.'` instance.', [
-            'exception' => $this->errors->last(),
-        ]);
+
         return $this->errorsAreThrown() ? throw $this->errors->last() : true;
     }
 
@@ -130,14 +126,13 @@ class Cloak
 
     public static function env(
         Closure $closure,
-        int $onError = self::OBEY,
-        ?LoggerInterface $logger = null
+        int $onError = self::OBEY
     ): self {
-        return new self($closure, $onError, ReportingLevel::fromEnv(), $logger);
+        return new self($closure, $onError, ReportingLevel::fromEnv());
     }
 
     /**
-     * @param array{0:Closure, 1:self::OBEY|self::SILENT|self::THROW|null, 2:LoggerInterface|null} $arguments
+     * @param array{0:Closure, 1:self::OBEY|self::SILENT|self::THROW|null} $arguments
      */
     public static function __callStatic(string $name, array $arguments): self
     {
@@ -147,7 +142,6 @@ class Cloak
                 $arguments[0],
                 $arguments[1] ?? self::OBEY,
                 ReportingLevel::__callStatic($name),
-                $arguments[2] ?? null
             ),
         };
     }
