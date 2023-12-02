@@ -96,11 +96,10 @@ if (!$touch = Cloak::warning(touch(...), Cloak::SILENT)) {
 ### Accessing the error
 
 To access the errors store in the instance you need to call the `Cloak::errors` method
-which will return a `CloakedErrors` instance. This exception which extends PHP's 
-`RuntimeException` is a container where you can access all the `ErrorException` generated
-during the execution of the closure.
-If no error occurred during the last execution of the class the `CloakedErrors` instance
-will be empty, otherwise you will get all the `\ErrorException` instances generated.
+which will return a `CloakedErrors` instance. This container gives you can access all
+the `ErrorException` generated during the last execution of the callback.
+If no error occurred during the last execution of the class, the `CloakedErrors` instance
+will be empty.
 
 ```php
 $touch = Cloak::all(touch(...));
@@ -108,7 +107,7 @@ $touch('/foobar');
 $errors = $touch->errors(); // $errors is a CloakedErrors instance
 $errors->isEmpty(); //true if the execution generated 0 ErrorException; false otherwise
 foreach ($errors as $error) {
-    $error; //ErrorException instances ordered from the newest one -> oldest one.
+    $error; //ErrorException instances ordered from the newest to the oldest one.
 }
 $errors->first(); // the oldest ErrorException
 $errors->last();  // the newest ErrorException
@@ -121,13 +120,16 @@ $errors->get(-2);
 
 ### Controlling when to throw or not your errors.
 
-The class general behaviour is controlled by two (2) static method:
+The class general behaviour is controlled by two (2) static methods.
+In all cases if an error occurred, it is converted into an `ErrorException`
+and will be made accessible via the `Cloak::errors` method. The difference
+being that with:
 
-- `Cloak::throwOnError`: every instance of `Cloak` will throw on error;
-- `Cloak::silentOnError`: every instance of `Cloak` will record the error but won't throw it;
+- `Cloak::throwOnError`: every instance will throw on the first error;
+- `Cloak::silentOnError`: no exception will be thrown;
 
 > [!NOTE]
-> to respect PHP's default behaviour by default `Cloak` uses `Cloak::silentOnError`
+> to respect PHP's behaviour, `Cloak` uses `Cloak::silentOnError` by default
 
 ### Named constructors
 
@@ -140,9 +142,11 @@ use Bakame\Aide\Error\Cloak;
 Cloak::env(); // will use the current environment error reporting value
 // and one for each error reporting level that exists in PHP
 Cloak::all();
+Cloak::error();
 Cloak::warning();
 Cloak::notice();
 Cloak::deprecated();
+Cloak::userError();
 Cloak::userWarning();
 Cloak::userNotice();
 Cloak::userDeprecated();
@@ -160,7 +164,7 @@ the `$onError` argument is used to tweak the instance behaviour on error:
 
 - `Cloak::THROW` will override the general behaviour and force throwing an exception if available
 - `Cloak::SILENT` will override the general behaviour and silence the error if it exists
-- `Cloak::OBEY` will comply with the environment behaviour.
+- `Cloak::OBEY` will comply with the curring general behaviour.
 
 If you really need other fined grained error level you can still use the constructor
 as shown below:
@@ -178,7 +182,9 @@ $touch = new Cloak(
 
 ### ReportingLevel class
 
-The previous code example can be rewritten using the `ReportingLevel` class which ships with the package:
+Because dealing with PHP error reporting level can be confusing sometimes, the package ships with an friendlier
+approach to deal with them. As an example, the previous code example can be rewritten using the
+`ReportingLevel` class.
 
 ```php
 <?php
@@ -192,7 +198,7 @@ $touch = new Cloak(
 );
 ```
 
-The class contains methods to ease working with error reporting level:
+The class exposes a friendlier API to ease working with error reporting level:
 
 - `ReportingLevel::fromValue` allow instantiating the class with any value you want. 
 - `ReportingLevel::fromName` allow instantiating the class with the string corresponding to one of the `E_*` constants.
@@ -201,7 +207,7 @@ The class contains methods to ease working with error reporting level:
 bitwise `OR` operation starting at `0` meaning that no Error reporting level exists if none is added.
 - `ReportingLevel::fromExclusion` does the opposite, each value given will be removed from the maximum value, represented by `E_ALL`.
 
-on top of that the class expose a construct for each error reporting level via using the following syntax:
+on top of that the class expose a construct for each error reporting level using the following syntax:
 
 ```php
 
@@ -239,7 +245,7 @@ $reportingLevel->included();
 // ["E_NOTICE", "E_DEPRECATED"]
 ```
 
-### Accessing the Error Reporting Level
+### Accessing the Error Reporting Level from a Cloak instance
 
 Once instantiated, you can always access the error reporting level via
 the `errorLevel` method on a `Cloak` instance. For example, if you need to know if a
