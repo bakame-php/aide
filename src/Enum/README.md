@@ -71,12 +71,13 @@ Gather information regarding the current Enum via **public static methods**. Thi
 ```php
 <?php
 
-HttpMethod::size(); //returns the number of cases
+HttpMethod::size();        //returns the number of cases
 HttpMethod::isBacked();
 HttpMethod::isNotBacked(); // returns the inverse of the `isBacked` method
-HttpMethod::names(); // returns a list of all the names in the enumeration
-HttpMethod::values();    // returns a list of all the names in the enumeration
-HttpMethod:namedOf(404); // returns the associative array key or null if it does not exist for the submitted value.
+HttpMethod::names();       // returns a list of all the names in the enumeration
+HttpMethod::values();      // returns a list of all the names in the enumeration
+HttpMethod:nameOf(404);    // returns the name associated with the given value
+                           // or null if it does not exist for the submitted value.
 ```
 
 You need the `Bakame\Aide\Enum\Info` trait to expose the new API.
@@ -134,9 +135,11 @@ enum HttpMethod: string
 
 ### Comparison
 
-Last but not least we have the `Compare` trait which adds four (4) methods to compare
-Enums instances.
-
+The `Compare` trait which adds four (4) methods to compare Enums instances.
+The `equals` and `notEquals` methods do strict comparison whereas `isOneOf`
+and `isNotOneOf` do loose comparison taking into account the value or the name
+of the Enum.
+ 
 ```php
 <?php
 
