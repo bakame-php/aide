@@ -153,7 +153,7 @@ Cloak::userDeprecated();
 They all share the same signature:
 
 ```php
-static method(Closure $closure, int $onError = Cloak::OBEY);
+static method(Closure $callback, int $onError = Cloak::OBEY);
 ```
 
 the `$onError` argument is used to tweak the instance behaviour on error:

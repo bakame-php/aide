@@ -16,22 +16,22 @@ use function restore_error_handler;
 use function set_error_handler;
 
 /**
- * @method static Cloak all(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak error(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak warning(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak parse(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak notice(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak coreError(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak coreWarning(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak compileError(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak compileWarning(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak userError(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak userWarning(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak userNotice(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak strict(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak recoverableError(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak deprecated(Closure $closure, ?int $onError = self::OBEY)
- * @method static Cloak userDeprecated(Closure $closure, ?int $onError = self::OBEY)
+ * @method static Cloak all(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak error(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak warning(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak parse(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak notice(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak coreError(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak coreWarning(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak compileError(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak compileWarning(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak userError(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak userWarning(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak userNotice(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak strict(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak recoverableError(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak deprecated(Closure $callback, ?int $onError = self::OBEY)
+ * @method static Cloak userDeprecated(Closure $callback, ?int $onError = self::OBEY)
  */
 class Cloak
 {
@@ -48,7 +48,7 @@ class Cloak
      * @throws ValueError
      */
     public function __construct(
-        protected readonly Closure $closure,
+        protected readonly Closure $callback,
         protected readonly int $onError = self::OBEY,
         ReportingLevel|string|int|null $reportingLevel = null
     ) {
@@ -92,7 +92,7 @@ class Cloak
         $this->errors->reset();
         try {
             set_error_handler($this->errorHandler(...), $this->reportingLevel->value());
-            $result = ($this->closure)(...$arguments);
+            $result = ($this->callback)(...$arguments);
         } finally {
             restore_error_handler();
         }
@@ -124,11 +124,9 @@ class Cloak
         self::$useException = false;
     }
 
-    public static function env(
-        Closure $closure,
-        int $onError = self::OBEY
-    ): self {
-        return new self($closure, $onError, ReportingLevel::fromEnv());
+    public static function env(Closure $callback, int $onError = self::OBEY): self
+    {
+        return new self($callback, $onError, ReportingLevel::fromEnv());
     }
 
     /**

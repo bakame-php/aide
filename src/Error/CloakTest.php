@@ -127,13 +127,13 @@ final class CloakTest extends TestCase
     #[Test]
     public function it_can_collection_all_errors_if_errors_are_silenced(): void
     {
-        $closure = function (string $path): array|false {
+        $callback = function (string $path): array|false {
             touch($path);
 
             return file($path);
         };
 
-        $lambda = Cloak::warning($closure);
+        $lambda = Cloak::warning($callback);
         $res = $lambda('/foobar');
         $errors = $lambda->errors();
         self::assertFalse($res);
@@ -149,14 +149,14 @@ final class CloakTest extends TestCase
     #[Test]
     public function it_throws_with_the_first_error_if_errors_are_thrown(): void
     {
-        $closure = function (string $path): array|false {
+        $callback = function (string $path): array|false {
             touch($path);
 
             return file($path);
         };
 
         try {
-            $lambda = Cloak::warning($closure, Cloak::THROW);
+            $lambda = Cloak::warning($callback, Cloak::THROW);
             $lambda('/foobar');
             self::fail(ErrorException::class.' was not thrown');
         } catch (ErrorException $cloakedErrors) {
