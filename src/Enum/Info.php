@@ -14,7 +14,7 @@ trait Info
 {
     public static function isBacked(): bool
     {
-        return (new ReflectionEnum(static::class))->isBacked();
+        return (new ReflectionEnum(static::class))->isBacked(); /* @phpstan-ignore-line */
     }
 
     public static function isNotBacked(): bool

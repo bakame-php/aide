@@ -45,12 +45,8 @@ trait Hasser
      */
     public static function hasValue(int|string $value): bool
     {
-        if (!(new ReflectionEnum(static::class))->isBacked()) {
-            return false;
-        }
-
         foreach (static::cases() as $enum) {
-            if ($enum->value === $value) { /* @phpstan-ignore-line */
+            if ($enum?->value === $value) { /* @phpstan-ignore-line */
                 return true;
             }
         }
@@ -65,12 +61,8 @@ trait Hasser
      */
     public static function hasCase(string $name, int|string $value): bool
     {
-        if (!(new ReflectionEnum(static::class))->isBacked()) {
-            return false;
-        }
-
         foreach (static::cases() as $enum) {
-            if ($enum->name === $name && $enum->value === $value) { /* @phpstan-ignore-line */
+            if ($enum?->name === $name && $enum?->value === $value) { /* @phpstan-ignore-line */
                 return true;
             }
         }

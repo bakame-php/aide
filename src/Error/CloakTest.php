@@ -82,7 +82,7 @@ final class CloakTest extends TestCase
         $touch('/foo');
     }
 
-    public function testErrorTransformedIntoAnInvalidArgumentException(): void
+    public function testErrorTransformedIntoAnErrorException(): void
     {
         Cloak::throwOnError();
         $this->expectException(ErrorException::class);
@@ -96,14 +96,14 @@ final class CloakTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         Cloak::throwOnError();
-        $touch = Cloak::userDeprecated(touch(...), Cloak::SILENT);
+        $touch = Cloak::warning(touch(...), Cloak::SILENT);
         $touch('/foo');
     }
 
     public function testCaptureNothingThrowNoException(): void
     {
         Cloak::throwOnError();
-        $strtoupper = Cloak::notice(strtoupper(...));
+        $strtoupper = Cloak::userDeprecated(strtoupper(...));
 
         self::assertSame('FOO', $strtoupper('foo'));
     }
