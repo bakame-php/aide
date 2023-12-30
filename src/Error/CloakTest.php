@@ -29,6 +29,7 @@ final class CloakTest extends TestCase
     #[Test]
     public function it_returns_information_about_its_error_reporting_level(): void
     {
+        error_reporting(-1);
         $lambda = Cloak::warning(touch(...));
         $res = $lambda('/foo');
 
@@ -59,6 +60,8 @@ final class CloakTest extends TestCase
 
     public function testCapturesTriggeredError(): void
     {
+        error_reporting(-1);
+
         $lambda = Cloak::all(trigger_error(...));
         $lambda('foo');
 
@@ -75,6 +78,7 @@ final class CloakTest extends TestCase
 
     public function testErrorTransformedIntoARuntimeException(): void
     {
+        error_reporting(-1);
         $this->expectException(ErrorException::class);
 
         Cloak::throwOnError();
@@ -84,6 +88,7 @@ final class CloakTest extends TestCase
 
     public function testErrorTransformedIntoAnErrorException(): void
     {
+        error_reporting(-1);
         Cloak::throwOnError();
         $this->expectException(ErrorException::class);
 
@@ -127,6 +132,7 @@ final class CloakTest extends TestCase
     #[Test]
     public function it_can_collection_all_errors_if_errors_are_silenced(): void
     {
+        error_reporting(-1);
         $callback = function (string $path): array|false {
             touch($path);
 
@@ -149,6 +155,7 @@ final class CloakTest extends TestCase
     #[Test]
     public function it_throws_with_the_first_error_if_errors_are_thrown(): void
     {
+        error_reporting(-1);
         $callback = function (string $path): array|false {
             touch($path);
 

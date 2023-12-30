@@ -1,6 +1,6 @@
 # Aide for Errors
 
-A collection of class to avoid repeating the same methods on PHP's Enum.
+A Cloak system to help dealing with error reporting in PHP.
 
 > [!CAUTION]  
 > Sub-split of Aide for Error.  
