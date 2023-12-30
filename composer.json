@@ -36,6 +36,9 @@
     "symfony/var-dumper": "^6.4.0"
   },
   "autoload": {
+      "files": [
+          "src/Base32/functions.php"
+      ],
     "psr-4": {
       "Bakame\\Aide\\": "src/"
     }
