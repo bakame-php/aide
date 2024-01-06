@@ -110,8 +110,14 @@ class Cloak
         }
 
         $this->errors->unshift(new ErrorException($errstr, 0, $errno, $errfile, $errline));
+        if ($this->errorsAreThrown()) {
+            /** @var ErrorException $error */
+            $error = $this->errors->last();
 
-        return $this->errorsAreThrown() ? throw $this->errors->last() : true;
+            throw $error;
+        }
+
+        return true;
     }
 
     public static function throwOnError(): void
