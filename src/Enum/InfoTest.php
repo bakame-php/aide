@@ -13,7 +13,7 @@ final class InfoTest extends TestCase
     public function it_can_get_information_from_a_pure_enumeration(): void
     {
         self::assertFalse(Direction::isBacked());
-        self::assertTrue(Direction::isNotBacked());
+        self::assertTrue(Direction::isPure());
         self::assertSame(4, Direction::size());
         self::assertSame([], Direction::associative());
         self::assertSame(['Top', 'Down', 'Left', 'Right'], Direction::names());
@@ -25,7 +25,7 @@ final class InfoTest extends TestCase
     public function it_can_get_information_from_a_backed_enumeration(): void
     {
         self::assertTrue(Cardinal::isBacked());
-        self::assertFalse(Cardinal::isNotBacked());
+        self::assertFalse(Cardinal::isPure());
         self::assertSame(4, Direction::size());
         self::assertSame(['North' => 'north', 'South' => 'south', 'East' => 'east', 'West' => 'west'], Cardinal::associative());
         self::assertSame(['North', 'South', 'East', 'West'], Cardinal::names());

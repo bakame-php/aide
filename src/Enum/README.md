@@ -1,6 +1,6 @@
 # Aide for Enums
 
-A collection of traits to avoid repeating the same methods on PHP's Enum.
+A collection of traits and classes to improve handling PHP's Enum.
 
 > [!CAUTION]  
 > Sub-split of Aide for Enum helpers.  
@@ -22,7 +22,9 @@ You need:
 
 ## Usage
 
-### Factory
+### Traits
+
+#### Factory
 
 Enable creating Pure or Backed Enum based on their name. The trait adds two (2) new static methods,
 `tryFromName` and `fromName` and re-introduce the `tryFrom` and `from` method on pure Enums.
@@ -57,12 +59,12 @@ enum HttpMethod
 }
 ```
 
-### Info
+#### Info
 
 Gather information regarding the current Enum via **public static methods**. This trait enables getting:
 
 - the number of cases via the `size` method;
-- the type of enum via the `isBacked` and `isNotBacked` method;
+- the type of enum via the `isBacked` and `isPure` method;
 - the names of each cases with the `names` method;
 - the possible values for the Enum with the `values` method;
 - the `associative` method which returns an associative array contains the string name and their respective values;
@@ -73,10 +75,10 @@ Gather information regarding the current Enum via **public static methods**. Thi
 
 HttpMethod::size();        //returns the number of cases
 HttpMethod::isBacked();
-HttpMethod::isNotBacked(); // returns the inverse of the `isBacked` method
+HttpMethod::isPure(); // returns the inverse of the `isBacked` method
 HttpMethod::names();       // returns a list of all the names in the enumeration
 HttpMethod::values();      // returns a list of all the names in the enumeration
-HttpMethod:nameOf(404);    // returns the name associated with the given value
+HttpMethod::nameOf(404);   // returns the name associated with the given value
                            // or null if it does not exist for the submitted value.
 ```
 
@@ -99,7 +101,7 @@ enum HttpMethod: string
 }
 ```
 
-### Hasser/Isser methods
+#### Hasser/Isser methods
 
 Enables asking whether some data are present in the Enum
 
@@ -133,7 +135,7 @@ enum HttpMethod: string
 }
 ```
 
-### Comparison
+#### Comparison
 
 The `Compare` trait which adds four (4) methods to compare Enums instances.
 The `equals` and `notEquals` methods do strict comparison whereas `isOneOf`
@@ -168,7 +170,7 @@ enum HttpMethod: string
 }
 ```
 
-### All in one
+#### All in one
 
 If you want to apply all the traits together just use the single one which encompass all the traits
 already mentioned `Bakame\Aide\Enum\Helper`. Once added to your enum all the methods described here
@@ -192,6 +194,179 @@ enum HttpMethod: string
     case Options = 'OPTIONS'
 }
 ```
+
+### Converting the Enum into a Javascript structure
+
+The `JavascriptConverter` enables converting your PHP Enum into an equivalent structure in Javascript.
+Because there are two (2) ways to create an Enum like structure in Javascript, the class provides
+two (2) methods to allow the conversion.
+
+In both cases, the conversion is configurable via wither methods to control the formatting and the
+Javascript structure properties. 
+
+#### Backed Enum
+
+For instance, given I have the following enum:
+
+```php
+enum HttpStatusCode: int
+{
+    case HTTP_OK = 200;
+    case HTTP_REDIRECTION = 302;
+    case HTTP_NOT_FOUND = 404;
+    case HTTP_SERVER_ERROR = 500;
+}
+```
+
+It can be converted into an object using the `convertToObject` method:
+
+```php
+use Bakame\Aide\Enum\JavascriptConverter;
+
+echo JavascriptConverter::new()->convertToObject(HttpStatusCode::class);
+```
+
+will produce the following javascript code snippet:
+
+```javascript
+const HttpStatusCode = Object.freeze({
+  HTTP_OK: 200,
+  HTTP_REDIRECTION: 302,
+  HTTP_NOT_FOUND: 404,
+  HTTP_SERVER_ERROR: 500,
+})
+```
+
+conversely using `convertToClass` as follows:
+
+```php
+echo JavascriptConverter::new()->convertToClass(HttpStatusCode::class);
+```
+
+will produce the following javascript code snippet:
+
+```javascript
+class HttpStatusCode {
+  static HTTP_OK = new HttpStatusCode(200)
+  static HTTP_REDIRECTION = new HttpStatusCode(302)
+  static HTTP_NOT_FOUND = new HttpStatusCode(404)
+  static HTTP_SERVER_ERROR = new HttpStatusCode(500)
+    
+  constructor(name) {
+    this.name = name
+  }
+}
+```
+
+Of course there are ways to improve the output depending on your use case you can
+
+- ignore or use object immutability;
+- ignore or use Javascript `export` or `export default`;
+- change the class name or add and/or change the object variable name;
+- use `Symbol` when declaring the object property value;
+- define indentation spaces and thus end of line;
+
+Here's a more advance usage of the converter to highlight how you can configure it.
+
+```php
+<?php
+use Bakame\Aide\Enum\JavascriptConverter;
+use Illuminate\Support\Str;
+
+$converter = JavascriptConverter::new()
+    ->useImmutability()
+    ->useExportDefault()
+    ->useSymbol()
+    ->indentSize(4)
+    ->propertyNameCase(
+        fn (string $name) => Str::of($name)->replace('HTTP_', '')->lower()->studly()->toString()
+    );
+
+echo $converter->convertToObject(HttpStatusCode::class, 'StatusCode');
+```
+
+will return the following Javascript code:
+
+```javascript
+const StatusCode = Object.freeze({
+    Ok: Symbol(200),
+    Redirection: Symbol(302),
+    NotFound: Symbol(404),
+    ServerError: Symbol(500),
+});
+export default StatusCode;
+```
+
+#### Pure Enum
+
+For Pure PHP Enum, the converter will assign a unique `Symbol` value for each case, starting
+wih the `Symbol(0)` and following the PHP order of case declaration. you can optionally
+configure the start value using the `startAt` method.
+
+Let's take the following PHP Pure Enum:
+
+```php
+enum Color
+{
+    case Red;
+    case Blue;
+    case Green;
+}
+```
+
+It can be converted into an object using the `convertToObject` method:
+
+```php
+use Bakame\Aide\Enum\JavascriptConverter;
+
+echo JavascriptConverter::new()->convertToObject(Color::class);
+```
+
+will produce the following javascript code snippet:
+
+```javascript
+const Color = Object.freeze({
+  Red: Symbol(0),
+  Blue: Symbol(1),
+  Green: Symbol(2),
+})
+```
+
+If you set up the starting value to increment you will get a different value:
+
+```php
+use Bakame\Aide\Enum\JavascriptConverter;
+
+echo JavascriptConverter::new()
+    ->ignoreSymbol()
+    ->startAt(2)
+    ->convertToClass(Color::class, 'Colour');
+```
+
+Then the start at value will be taken into account as shown below:
+
+```javascript
+class Colour {
+  static Red = new Colour(Symbol(2))
+  static Blue = new Colour(Symbol(3))
+  static Green = new Colour(Symbol(4))
+
+  constructor(name) {
+    this.name = name
+  }
+}
+```
+
+> [!CAUTION]  
+>  For Pure Enum the `ignoreSymbol` and `useSymbol` methods have no effect on the output.
+
+#### Storing the output
+
+The converter will not store the resulting string into a Javascriot file as this part is
+left to the discretion of the implementor. There are several ways to do so:
+
+- using vanilla PHP with `file_put_contents` or `SplFileObject`
+- using more robust and battle tested packages you can find on packagist for instance.
 
 ## Credits
 
