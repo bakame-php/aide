@@ -21,7 +21,7 @@ final class JavascriptConverterTest extends TestCase
     #[Test]
     public function it_will_fails_converting_a_non_backed_enum(): void
     {
-        $actual = JavascriptConverter::new()->convertToObject(HttpMethod::class); /* @phpstan-ignore-line */
+        $actual = JavascriptConverter::new()->convertToObject(HttpMethod::class);
     }
 
     #[Test]
@@ -199,4 +199,36 @@ JS;
 
         self::assertSame($expected, $actual);
     }
+
+    #[Test]
+    public function it_can_convert_a_pure_enum_with_different_starting_value(): void
+    {
+        $actualStartAtZero = JavascriptConverter::new()
+            ->indentSize(0)
+            ->convertToObject(Dir::class);
+
+        $actualStartAtFortyTwo = JavascriptConverter::new()
+            ->indentSize(0)
+            ->valueStartAt(42)
+            ->convertToObject(Dir::class);
+
+        $expectedZero = <<<JS
+const Dir = Object.freeze({Top: Symbol(0),Down: Symbol(1),Left: Symbol(2),Right: Symbol(3),})
+JS;
+        $expectedFortyTwo = <<<JS
+const Dir = Object.freeze({Top: Symbol(42),Down: Symbol(43),Left: Symbol(44),Right: Symbol(45),})
+JS;
+
+        self::assertNotSame($actualStartAtFortyTwo, $actualStartAtZero);
+        self::assertSame($expectedZero, $actualStartAtZero);
+        self::assertSame($expectedFortyTwo, $actualStartAtFortyTwo);
+    }
+}
+
+enum Dir
+{
+    case Top;
+    case Down;
+    case Left;
+    case Right;
 }

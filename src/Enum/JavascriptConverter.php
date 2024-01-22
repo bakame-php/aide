@@ -21,7 +21,7 @@ final class JavascriptConverter
         private readonly ?Closure $propertyNameCasing,
         private readonly int $indentSize,
         private readonly string $export,
-        private readonly int $unitEnumStartAt
+        private readonly int $valueStartAt
     ) {
     }
 
@@ -33,7 +33,7 @@ final class JavascriptConverter
             propertyNameCasing: null,
             indentSize: 2,
             export: self::EXPORT_NONE,
-            unitEnumStartAt: 0,
+            valueStartAt: 0,
         );
     }
 
@@ -45,7 +45,7 @@ final class JavascriptConverter
             $casing,
             $this->indentSize,
             $this->export,
-            $this->unitEnumStartAt,
+            $this->valueStartAt,
         );
     }
 
@@ -59,7 +59,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 $this->export,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -74,7 +74,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 $this->export,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -89,7 +89,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 $this->export,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -104,7 +104,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 $this->export,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -119,7 +119,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 self::EXPORT_DEFAULT,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -134,7 +134,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 self::EXPORT,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -149,22 +149,22 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $this->indentSize,
                 self::EXPORT_NONE,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
 
-    public function startAt(int $startAt): self
+    public function valueStartAt(int $valueStartAt): self
     {
         return match (true) {
-            $startAt === $this->unitEnumStartAt => $this,
+            $valueStartAt === $this->valueStartAt => $this,
             default => new self(
                 $this->useSymbol,
                 $this->useImmutability,
                 $this->propertyNameCasing,
                 $this->indentSize,
                 $this->export,
-                $startAt,
+                $valueStartAt,
             ),
         };
     }
@@ -180,7 +180,7 @@ final class JavascriptConverter
                 $this->propertyNameCasing,
                 $indentSize,
                 $this->export,
-                $this->unitEnumStartAt,
+                $this->valueStartAt,
             ),
         };
     }
@@ -194,7 +194,7 @@ final class JavascriptConverter
      *     <li>If the object name is a non-empty string, it will be used as is as the const variable name</li>
      * </ul>
      *
-     * @param class-string<BackedEnum> $enumClass
+     * @param class-string<UnitEnum> $enumClass
      */
     public function convertToObject(string $enumClass, ?string $objectName = ''): string
     {
@@ -314,7 +314,7 @@ final class JavascriptConverter
     private function formatPropertyValue(UnitEnum $enum, int $offset = 0): string|int
     {
         $isBackedEnum = $enum instanceof BackedEnum;
-        $value = $isBackedEnum ? $enum->value : $offset + $this->unitEnumStartAt;
+        $value = $isBackedEnum ? $enum->value : $offset + $this->valueStartAt;
         $value = is_string($value) ? '"'.$value.'"' : $value;
 
         return match ($isBackedEnum) {

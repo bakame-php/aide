@@ -28,7 +28,7 @@ const Direction = Object.freeze({
 })
 
 JS;
-        self::assertSame($expected, Direction::toJavascript());
+        self::assertSame($expected, Direction::toJavaScript());
     }
 
     #[Test]
@@ -50,7 +50,7 @@ const Cardinal = Object.freeze({
 })
 
 JS;
-        self::assertSame($expected, Cardinal::toJavascript());
+        self::assertSame($expected, Cardinal::toJavaScript());
     }
 }
 

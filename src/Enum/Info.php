@@ -76,9 +76,8 @@ trait Info
     /**
      * Convert the Enum into a Javascript structure.
      */
-    public static function toJavascript(): string
+    public static function toJavaScript(): string
     {
-        return JavascriptConverter::new()
-            ->convertToObject(static::class); /* @phpstan-ignore-line */
+        return JavascriptConverter::new()->convertToObject(static::class); /* @phpstan-ignore-line */
     }
 }
