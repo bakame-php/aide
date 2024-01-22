@@ -19,6 +19,16 @@ final class InfoTest extends TestCase
         self::assertSame(['Top', 'Down', 'Left', 'Right'], Direction::names());
         self::assertSame([], Direction::values());
         self::assertNull(Direction::nameOf('Up'));
+        $expected = <<<JS
+const Direction = Object.freeze({
+  Top: Symbol(0),
+  Down: Symbol(1),
+  Left: Symbol(2),
+  Right: Symbol(3),
+})
+
+JS;
+        self::assertSame($expected, Direction::toJavascript());
     }
 
     #[Test]
@@ -31,6 +41,16 @@ final class InfoTest extends TestCase
         self::assertSame(['North', 'South', 'East', 'West'], Cardinal::names());
         self::assertSame(['north', 'south', 'east', 'west'], Cardinal::values());
         self::assertSame('West', Cardinal::nameOf('west'));
+        $expected = <<<JS
+const Cardinal = Object.freeze({
+  North: "north",
+  South: "south",
+  East: "east",
+  West: "west",
+})
+
+JS;
+        self::assertSame($expected, Cardinal::toJavascript());
     }
 }
 

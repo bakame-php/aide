@@ -72,4 +72,13 @@ trait Info
             default => $res,
         };
     }
+
+    /**
+     * Convert the Enum into a Javascript structure.
+     */
+    public static function toJavascript(): string
+    {
+        return JavascriptConverter::new()
+            ->convertToObject(static::class); /* @phpstan-ignore-line */
+    }
 }

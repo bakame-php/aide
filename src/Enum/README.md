@@ -69,17 +69,19 @@ Gather information regarding the current Enum via **public static methods**. Thi
 - the possible values for the Enum with the `values` method;
 - the `associative` method which returns an associative array contains the string name and their respective values;
 - the `nameOf` which returns the name associated with a specific `value`
+- the `toJavascript` which returns a Javascript structure equivalent to the current Enum.(see `JavascriptConverter` for more details)
 
 ```php
 <?php
 
 HttpMethod::size();        //returns the number of cases
 HttpMethod::isBacked();
-HttpMethod::isPure(); // returns the inverse of the `isBacked` method
+HttpMethod::isPure();      // returns the inverse of the `isBacked` method
 HttpMethod::names();       // returns a list of all the names in the enumeration
 HttpMethod::values();      // returns a list of all the names in the enumeration
 HttpMethod::nameOf(404);   // returns the name associated with the given value
                            // or null if it does not exist for the submitted value.
+HttpMethod::toJavascript(); // returns a Javascript structure equivalent
 ```
 
 You need the `Bakame\Aide\Enum\Info` trait to expose the new API.
@@ -198,8 +200,11 @@ enum HttpMethod: string
 ### Converting the Enum into a Javascript structure
 
 The `JavascriptConverter` enables converting your PHP Enum into an equivalent structure in Javascript.
+This is the mechanism used to implement the `Info::toJavascript` method. You can still override
+the method and return a more fine-tuned representation that suite your constraints better.
+
 Because there are two (2) ways to create an Enum like structure in Javascript, the class provides
-two (2) methods to allow the conversion.
+two (2) methods to allow the conversion. 
 
 In both cases, the conversion is configurable via wither methods to control the formatting and the
 Javascript structure properties. 
