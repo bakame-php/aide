@@ -78,6 +78,6 @@ trait Info
      */
     public static function toJavaScript(): string
     {
-        return JavascriptConverter::new()->convertToObject(static::class); /* @phpstan-ignore-line */
+        return JavaScriptConverter::new()->convertToObject(static::class); /* @phpstan-ignore-line */
     }
 }

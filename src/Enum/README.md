@@ -69,7 +69,7 @@ Gather information regarding the current Enum via **public static methods**. Thi
 - the possible values for the Enum with the `values` method;
 - the `associative` method which returns an associative array contains the string name and their respective values;
 - the `nameOf` which returns the name associated with a specific `value`
-- the `toJavaScript` which returns a Javascript structure equivalent to the current Enum.(see `JavascriptConverter` for more details)
+- the `toJavaScript` which returns a Javascript structure equivalent to the current Enum.(see `JavaScriptConverter` for more details)
 
 ```php
 <?php
@@ -197,9 +197,9 @@ enum HttpMethod: string
 }
 ```
 
-### Converting the Enum into a Javascript structure
+### Converting the Enum into a JavaScript structure
 
-The `JavascriptConverter` enables converting your PHP Enum into an equivalent structure in Javascript.
+The `JavaScriptConverter` enables converting your PHP Enum into an equivalent structure in Javascript.
 This is the mechanism used to implement the `Info::toJavaScript` method. You can still override
 the method and return a more fine-tuned representation that suite your constraints better.
 
@@ -226,9 +226,9 @@ enum HttpStatusCode: int
 It can be converted into an object using the `convertToObject` method:
 
 ```php
-use Bakame\Aide\Enum\JavascriptConverter;
+use Bakame\Aide\Enum\JavaScriptConverter;
 
-echo JavascriptConverter::new()->convertToObject(HttpStatusCode::class);
+echo JavaScriptConverter::new()->convertToObject(HttpStatusCode::class);
 ```
 
 will produce the following javascript code snippet:
@@ -245,7 +245,7 @@ const HttpStatusCode = Object.freeze({
 conversely using `convertToClass` as follows:
 
 ```php
-echo JavascriptConverter::new()->convertToClass(HttpStatusCode::class);
+echo JavaScriptConverter::new()->convertToClass(HttpStatusCode::class);
 ```
 
 will produce the following javascript code snippet:
@@ -275,10 +275,10 @@ Here's a more advance usage of the converter to highlight how you can configure 
 
 ```php
 <?php
-use Bakame\Aide\Enum\JavascriptConverter;
+use Bakame\Aide\Enum\JavaScriptConverter;
 use Illuminate\Support\Str;
 
-$converter = JavascriptConverter::new()
+$converter = JavaScriptConverter::new()
     ->useImmutability()
     ->useExportDefault()
     ->useSymbol()
@@ -322,9 +322,9 @@ enum Color
 It can be converted into an object using the `convertToObject` method:
 
 ```php
-use Bakame\Aide\Enum\JavascriptConverter;
+use Bakame\Aide\Enum\JavaScriptConverter;
 
-echo JavascriptConverter::new()->convertToObject(Color::class);
+echo JavaScriptConverter::new()->convertToObject(Color::class);
 ```
 
 will produce the following javascript code snippet:
@@ -340,9 +340,9 @@ const Color = Object.freeze({
 If you set up the starting value to increment you will get a different value:
 
 ```php
-use Bakame\Aide\Enum\JavascriptConverter;
+use Bakame\Aide\Enum\JavaScriptConverter;
 
-echo JavascriptConverter::new()
+echo JavaScriptConverter::new()
     ->ignoreSymbol()
     ->valueStartAt(2)
     ->convertToClass(Color::class, 'Colour');

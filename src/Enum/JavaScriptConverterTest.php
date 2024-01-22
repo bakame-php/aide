@@ -8,20 +8,20 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ValueError;
 
-final class JavascriptConverterTest extends TestCase
+final class JavaScriptConverterTest extends TestCase
 {
     #[Test]
     public function it_will_fails_with_a_negative_indent_size(): void
     {
         $this->expectException(ValueError::class);
 
-        JavascriptConverter::new()->indentSize(-1);
+        JavaScriptConverter::new()->indentSize(-1);
     }
 
     #[Test]
     public function it_will_fails_converting_a_non_backed_enum(): void
     {
-        $actual = JavascriptConverter::new()->convertToObject(HttpMethod::class);
+        $actual = JavaScriptConverter::new()->convertToObject(HttpMethod::class);
     }
 
     #[Test]
@@ -29,7 +29,7 @@ final class JavascriptConverterTest extends TestCase
     {
         $this->expectException(ValueError::class);
 
-        JavascriptConverter::new()->convertToObject(self::class); /* @phpstan-ignore-line */
+        JavaScriptConverter::new()->convertToObject(self::class); /* @phpstan-ignore-line */
     }
 
     #[Test]
@@ -44,7 +44,7 @@ const HttpStatusCode = Object.freeze({
 })
 
 JS;
-        $converter = JavascriptConverter::new();
+        $converter = JavaScriptConverter::new();
         $altConverter = $converter
             ->useImmutability()
             ->ignoreExport()
@@ -69,7 +69,7 @@ export const Foobar = {
 JS;
         self::assertSame(
             $expected,
-            JavascriptConverter::new()
+            JavaScriptConverter::new()
                 ->ignoreImmutability()
                 ->propertyNameCase(strtolower(...))
                 ->useSymbol()
@@ -95,7 +95,7 @@ class HttpStatusCode {
 }
 
 JS;
-        $converter = JavascriptConverter::new();
+        $converter = JavaScriptConverter::new();
         $altConverter = $converter
             ->useImmutability()
             ->ignoreExport()
@@ -130,7 +130,7 @@ export default class Foobar {
 }
 
 JS;
-        $converter = JavascriptConverter::new()
+        $converter = JavaScriptConverter::new()
             ->useImmutability()
             ->ignoreSymbol()
             ->indentSize(4)
@@ -164,7 +164,7 @@ const StatusCode = Object.freeze({
 export default StatusCode;
 
 JS;
-        $actual = JavascriptConverter::new()
+        $actual = JavaScriptConverter::new()
             ->useImmutability()
             ->useExportDefault()
             ->useSymbol()
@@ -189,7 +189,7 @@ JS;
         $expected = <<<JS
 export default Object.freeze({Ok: Symbol(200),Redirection: Symbol(302),NotFound: Symbol(404),ServerError: Symbol(500),})
 JS;
-        $actual = JavascriptConverter::new()
+        $actual = JavaScriptConverter::new()
             ->useImmutability()
             ->useExportDefault()
             ->useSymbol()
@@ -203,11 +203,11 @@ JS;
     #[Test]
     public function it_can_convert_a_pure_enum_with_different_starting_value(): void
     {
-        $actualStartAtZero = JavascriptConverter::new()
+        $actualStartAtZero = JavaScriptConverter::new()
             ->indentSize(0)
             ->convertToObject(Dir::class);
 
-        $actualStartAtFortyTwo = JavascriptConverter::new()
+        $actualStartAtFortyTwo = JavaScriptConverter::new()
             ->indentSize(0)
             ->valueStartAt(42)
             ->convertToObject(Dir::class);

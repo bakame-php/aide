@@ -9,7 +9,7 @@ use Closure;
 use UnitEnum;
 use ValueError;
 
-final class JavascriptConverter
+final class JavaScriptConverter
 {
     private const EXPORT = 'export ';
     private const EXPORT_DEFAULT = 'export default ';
