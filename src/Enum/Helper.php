@@ -8,6 +8,7 @@ trait Helper
 {
     use Compare;
     use Info;
+    use Convert;
     use Factory;
     use Hasser;
 }

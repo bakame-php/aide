@@ -15,7 +15,6 @@ final class InfoTest extends TestCase
         self::assertFalse(Direction::isBacked());
         self::assertTrue(Direction::isPure());
         self::assertSame(4, Direction::size());
-        self::assertSame([], Direction::associative());
         self::assertSame(['Top', 'Down', 'Left', 'Right'], Direction::names());
         self::assertSame([], Direction::values());
         self::assertNull(Direction::nameOf('Up'));
@@ -37,7 +36,6 @@ JS;
         self::assertTrue(Cardinal::isBacked());
         self::assertFalse(Cardinal::isPure());
         self::assertSame(4, Direction::size());
-        self::assertSame(['North' => 'north', 'South' => 'south', 'East' => 'east', 'West' => 'west'], Cardinal::associative());
         self::assertSame(['North', 'South', 'East', 'West'], Cardinal::names());
         self::assertSame(['north', 'south', 'east', 'west'], Cardinal::values());
         self::assertSame('West', Cardinal::nameOf('west'));
@@ -57,6 +55,7 @@ JS;
 enum Direction
 {
     use Info;
+    use Convert;
 
     case Top;
     case Down;
@@ -67,6 +66,7 @@ enum Direction
 enum Cardinal: string
 {
     use Info;
+    use Convert;
 
     case North = 'north';
     case South = 'south';

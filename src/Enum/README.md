@@ -172,6 +172,39 @@ enum HttpMethod: string
 }
 ```
 
+#### Convert
+
+The `Convefrt` trait adds two (2) methods to convert Enums instances.
+The `toAssociative` converts the Enum instance into an associative 
+array whereas the `toJavaScript` method converts the Enum into a 
+Javascript equivalent structure.
+
+```php
+<?php
+
+HttpMethod::toAssociative(); // returns tha associative array
+HttpMethod::toJavaScript();  // returns a Javascript structure equivalent code
+```
+
+You need the `Bakame\Aide\Enum\Convert` trait to expose the new API.
+
+```php
+<?php
+
+use Bakame\Aide\Enum\Convert;
+
+enum HttpMethod: string
+{
+    use Convert;
+
+    case Get = 'GET';
+    case Post = 'POST';
+    case Put = 'PUT';
+    case Head = 'HEAD';
+    case Options = 'OPTIONS'
+}
+```
+
 #### All in one
 
 If you want to apply all the traits together just use the single one which encompass all the traits
@@ -199,9 +232,9 @@ enum HttpMethod: string
 
 ### Converting the Enum into a JavaScript structure
 
-The `JavaScriptConverter` enables converting your PHP Enum into an equivalent structure in Javascript.
-This is the mechanism used to implement the `Info::toJavaScript` method. You can still override
-the method and return a more fine-tuned representation that suite your constraints better.
+While the `Convert::toJavaScript` method is enought to convert your Enum to JavaScript code,
+behind the scene the method makes use of the `JavaScriptConverter` class. The class enables
+returning a more fine-tuned representation that suite your constraints better.
 
 Because there are two (2) ways to create an Enum like structure in Javascript, the class provides
 two (2) methods to allow the conversion. 

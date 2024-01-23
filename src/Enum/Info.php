@@ -49,35 +49,21 @@ trait Info
     }
 
     /**
-     * Converts the enum into an associative array.
-     *
-     * @return array<string, string|int>
-     */
-    public static function associative(): array
-    {
-        return array_column(static::cases(), 'value', 'name');
-    }
-
-    /**
      * Returns the enumeration name associated to the value if it exists.
      * Otherwise, null is returned.
      */
     public static function nameOf(string|int $value): ?string
     {
         /** @var string|false $res */
-        $res = array_search($value, static::associative(), true);
+        $res = array_search(
+            $value,
+            array_column(static::cases(), 'value', 'name'),
+            true
+        );
 
         return match ($res) {
             false => null,
             default => $res,
         };
-    }
-
-    /**
-     * Convert the Enum into a Javascript structure.
-     */
-    public static function toJavaScript(): string
-    {
-        return JavaScriptConverter::new()->convertToObject(static::class); /* @phpstan-ignore-line */
     }
 }
