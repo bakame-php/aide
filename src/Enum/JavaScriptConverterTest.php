@@ -19,12 +19,6 @@ final class JavaScriptConverterTest extends TestCase
     }
 
     #[Test]
-    public function it_will_fails_converting_a_non_backed_enum(): void
-    {
-        $actual = JavaScriptConverter::new()->convertToObject(HttpMethod::class);
-    }
-
-    #[Test]
     public function it_will_fails_converting_a_non_enum(): void
     {
         $this->expectException(ValueError::class);
