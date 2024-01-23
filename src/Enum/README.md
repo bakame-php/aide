@@ -171,16 +171,16 @@ enum HttpMethod: string
 
 #### Convert
 
-The `Convefrt` trait adds two (2) methods to convert Enums instances.
+The `Convert` trait adds two (2) methods to convert Enums instances.
 The `toAssociative` converts the Enum instance into an associative 
 array whereas the `toJavaScript` method converts the Enum into a 
-Javascript equivalent structure.
+JavaScript equivalent structure.
 
 ```php
 <?php
 
 HttpMethod::toAssociative(); // returns tha associative array
-HttpMethod::toJavaScript();  // returns a Javascript structure equivalent code as string
+HttpMethod::toJavaScript();  // returns a JavaScript structure equivalent code as string
 ```
 
 You need the `Bakame\Aide\Enum\Convert` trait to expose the new API.
@@ -233,11 +233,11 @@ While the `Convert::toJavaScript` method is enought to convert your Enum to Java
 behind the scene the method makes use of the `JavaScriptConverter` class. The class enables
 returning a more fine-tuned representation that suite your constraints better.
 
-Because there are two (2) ways to create an Enum like structure in Javascript, the class provides
+Because there are two (2) ways to create an Enum like structure in JavaScript, the class provides
 two (2) methods to allow the conversion. 
 
 In both cases, the conversion is configurable via wither methods to control the formatting and the
-Javascript structure properties. 
+JavaScript structure properties. 
 
 #### Backed Enum
 
@@ -261,7 +261,7 @@ use Bakame\Aide\Enum\JavaScriptConverter;
 echo JavaScriptConverter::new()->convertToObject(HttpStatusCode::class);
 ```
 
-will produce the following javascript code snippet:
+will produce the following JavaScript code snippet:
 
 ```javascript
 const HttpStatusCode = Object.freeze({
@@ -278,7 +278,7 @@ conversely using `convertToClass` as follows:
 echo JavaScriptConverter::new()->convertToClass(HttpStatusCode::class);
 ```
 
-will produce the following javascript code snippet:
+will produce the following JavaScript code snippet:
 
 ```javascript
 class HttpStatusCode {
@@ -296,7 +296,7 @@ class HttpStatusCode {
 Of course there are ways to improve the output depending on your use case you can
 
 - ignore or use object immutability;
-- ignore or use Javascript `export` or `export default`;
+- ignore or use JavaScript `export` or `export default`;
 - change the class name or add and/or change the object variable name;
 - use `Symbol` when declaring the object property value;
 - define indentation spaces and thus end of line;
@@ -322,7 +322,7 @@ $converter = JavaScriptConverter::new()
 echo $converter->convertToObject(HttpStatusCode::class, 'StatusCode');
 ```
 
-will return the following Javascript code:
+will return the following JavaScript code:
 
 ```javascript
 const StatusCode = Object.freeze({
@@ -359,7 +359,7 @@ use Bakame\Aide\Enum\JavaScriptConverter;
 echo JavaScriptConverter::new()->convertToObject(Color::class);
 ```
 
-will produce the following javascript code snippet:
+will produce the following JavaScript code snippet:
 
 ```javascript
 const Color = Object.freeze({
