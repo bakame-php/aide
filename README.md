@@ -23,6 +23,7 @@ Please visit the following README for more details on:
 
 - [Aide for Enums](https://github.com/bakame-php/aide-enum)
 - [Aide for Errors](https://github.com/bakame-php/aide-error)
+- [Aide for Base32 (Experimental)](https://github.com/bakame-php/aide-base32)
 
 ## Testing
 
