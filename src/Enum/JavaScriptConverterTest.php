@@ -34,7 +34,7 @@ const HttpStatusCode = Object.freeze({
   HTTP_OK: 200,
   HTTP_REDIRECTION: 302,
   HTTP_NOT_FOUND: 404,
-  HTTP_SERVER_ERROR: 500,
+  HTTP_SERVER_ERROR: 500
 })
 
 JS;
@@ -57,7 +57,7 @@ export const Foobar = {
     http_ok: Symbol(200),
     http_redirection: Symbol(302),
     http_not_found: Symbol(404),
-    http_server_error: Symbol(500),
+    http_server_error: Symbol(500)
 }
 
 JS;
@@ -153,7 +153,7 @@ const StatusCode = Object.freeze({
     Ok: Symbol(200),
     Redirection: Symbol(302),
     NotFound: Symbol(404),
-    ServerError: Symbol(500),
+    ServerError: Symbol(500)
 });
 export default StatusCode;
 
@@ -181,7 +181,7 @@ JS;
         ));
 
         $expected = <<<JS
-export default Object.freeze({Ok: Symbol(200),Redirection: Symbol(302),NotFound: Symbol(404),ServerError: Symbol(500),})
+export default Object.freeze({Ok: Symbol(200),Redirection: Symbol(302),NotFound: Symbol(404),ServerError: Symbol(500)})
 JS;
         $actual = JavaScriptConverter::new()
             ->useImmutability()
@@ -199,10 +199,12 @@ JS;
     {
         $actualStartAtZero = JavaScriptConverter::new()
             ->indentSize(0)
+            ->useTrailingComma()
             ->convertToObject(Dir::class);
 
         $actualStartAtFortyTwo = JavaScriptConverter::new()
             ->indentSize(0)
+            ->useTrailingComma()
             ->valueStartAt(42)
             ->convertToObject(Dir::class);
 

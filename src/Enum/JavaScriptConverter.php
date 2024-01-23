@@ -21,7 +21,8 @@ final class JavaScriptConverter
         private readonly ?Closure $propertyNameCasing,
         private readonly int $indentSize,
         private readonly string $export,
-        private readonly int $valueStartAt
+        private readonly int $valueStartAt,
+        private readonly bool $useTrailingComma,
     ) {
     }
 
@@ -34,6 +35,7 @@ final class JavaScriptConverter
             indentSize: 2,
             export: self::EXPORT_NONE,
             valueStartAt: 0,
+            useTrailingComma: false,
         );
     }
 
@@ -46,6 +48,7 @@ final class JavaScriptConverter
             $this->indentSize,
             $this->export,
             $this->valueStartAt,
+            $this->useTrailingComma,
         );
     }
 
@@ -60,6 +63,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 $this->export,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -75,6 +79,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 $this->export,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -90,6 +95,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 $this->export,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -105,6 +111,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 $this->export,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -120,6 +127,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 self::EXPORT_DEFAULT,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -135,6 +143,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 self::EXPORT,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -150,6 +159,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 self::EXPORT_NONE,
                 $this->valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -165,6 +175,7 @@ final class JavaScriptConverter
                 $this->indentSize,
                 $this->export,
                 $valueStartAt,
+                $this->useTrailingComma,
             ),
         };
     }
@@ -181,6 +192,39 @@ final class JavaScriptConverter
                 $indentSize,
                 $this->export,
                 $this->valueStartAt,
+                $this->useTrailingComma,
+            ),
+        };
+    }
+
+    public function useTrailingComma(): self
+    {
+        return match ($this->useTrailingComma) {
+            true => $this,
+            default => new self(
+                $this->useSymbol,
+                $this->useImmutability,
+                $this->propertyNameCasing,
+                $this->indentSize,
+                $this->export,
+                $this->valueStartAt,
+                true,
+            ),
+        };
+    }
+
+    public function ignoreTrailingComma(): self
+    {
+        return match ($this->useTrailingComma) {
+            false => $this,
+            default => new self(
+                $this->useSymbol,
+                $this->useImmutability,
+                $this->propertyNameCasing,
+                $this->indentSize,
+                $this->export,
+                $this->valueStartAt,
+                false,
             ),
         };
     }
@@ -234,7 +278,12 @@ final class JavaScriptConverter
             $output[] = $space.$this->formatPropertyName($enum).': '.$this->formatPropertyValue($enum, $offset).',';
         }
 
-        return implode($eol, $output).$eol;
+        $body = implode($eol, $output);
+
+        return match ($this->useTrailingComma) {
+            true => $body,
+            false => substr($body, 0, -1),
+        }.$eol;
     }
 
     /**

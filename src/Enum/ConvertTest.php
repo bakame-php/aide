@@ -18,7 +18,7 @@ const Direction = Object.freeze({
   Top: Symbol(0),
   Down: Symbol(1),
   Left: Symbol(2),
-  Right: Symbol(3),
+  Right: Symbol(3)
 })
 
 JS;
@@ -34,7 +34,7 @@ const Cardinal = Object.freeze({
   North: "north",
   South: "south",
   East: "east",
-  West: "west",
+  West: "west"
 })
 
 JS;

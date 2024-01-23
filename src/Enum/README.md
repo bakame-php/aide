@@ -67,9 +67,7 @@ Gather information regarding the current Enum via **public static methods**. Thi
 - the type of enum via the `isBacked` and `isPure` method;
 - the names of each cases with the `names` method;
 - the possible values for the Enum with the `values` method;
-- the `associative` method which returns an associative array contains the string name and their respective values;
 - the `nameOf` which returns the name associated with a specific `value`
-- the `toJavaScript` which returns a Javascript structure equivalent to the current Enum.(see `JavaScriptConverter` for more details)
 
 ```php
 <?php
@@ -81,7 +79,6 @@ HttpMethod::names();       // returns a list of all the names in the enumeration
 HttpMethod::values();      // returns a list of all the names in the enumeration
 HttpMethod::nameOf(404);   // returns the name associated with the given value
                            // or null if it does not exist for the submitted value.
-HttpMethod::toJavaScript(); // returns a Javascript structure equivalent
 ```
 
 You need the `Bakame\Aide\Enum\Info` trait to expose the new API.
@@ -183,7 +180,7 @@ Javascript equivalent structure.
 <?php
 
 HttpMethod::toAssociative(); // returns tha associative array
-HttpMethod::toJavaScript();  // returns a Javascript structure equivalent code
+HttpMethod::toJavaScript();  // returns a Javascript structure equivalent code as string
 ```
 
 You need the `Bakame\Aide\Enum\Convert` trait to expose the new API.
@@ -271,7 +268,7 @@ const HttpStatusCode = Object.freeze({
   HTTP_OK: 200,
   HTTP_REDIRECTION: 302,
   HTTP_NOT_FOUND: 404,
-  HTTP_SERVER_ERROR: 500,
+  HTTP_SERVER_ERROR: 500
 })
 ```
 
@@ -303,6 +300,7 @@ Of course there are ways to improve the output depending on your use case you ca
 - change the class name or add and/or change the object variable name;
 - use `Symbol` when declaring the object property value;
 - define indentation spaces and thus end of line;
+- define the presence or absence of a trailing comma in the object representation;
 
 Here's a more advance usage of the converter to highlight how you can configure it.
 
@@ -314,6 +312,7 @@ use Illuminate\Support\Str;
 $converter = JavaScriptConverter::new()
     ->useImmutability()
     ->useExportDefault()
+    ->useTrailingComma()
     ->useSymbol()
     ->indentSize(4)
     ->propertyNameCase(
@@ -366,7 +365,7 @@ will produce the following javascript code snippet:
 const Color = Object.freeze({
   Red: Symbol(0),
   Blue: Symbol(1),
-  Green: Symbol(2),
+  Green: Symbol(2)
 })
 ```
 
