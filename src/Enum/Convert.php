@@ -17,10 +17,18 @@ trait Convert
     }
 
     /**
-     * Convert the Enum into a Javascript structure.
+     * Convert the Enum into a Javascript object.
      */
-    public static function toJavaScript(): string
+    public static function toJavaScriptObject(): string
     {
         return JavaScriptConverter::new()->convertToObject(static::class);
+    }
+
+    /**
+     * Convert the Enum into a Javascript class.
+     */
+    public static function toJavaScriptClass(): string
+    {
+        return JavaScriptConverter::new()->convertToClass(static::class);
     }
 }

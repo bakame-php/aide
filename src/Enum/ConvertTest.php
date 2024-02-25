@@ -22,14 +22,20 @@ const Direction = Object.freeze({
 })
 
 JS;
-        self::assertSame($expected, Direction::toJavaScript());
+        self::assertSame($expected, Direction::toJavaScriptObject());
     }
 
     #[Test]
     public function it_can_get_information_from_a_backed_enumeration(): void
     {
-        self::assertSame(['North' => 'north', 'South' => 'south', 'East' => 'east', 'West' => 'west'], Cardinal::toAssociative());
-        $expected = <<<JS
+        $expectedAssociative = [
+            'North' => 'north',
+            'South' => 'south',
+            'East' => 'east',
+            'West' => 'west',
+        ];
+
+        $expectedObject = <<<JS
 const Cardinal = Object.freeze({
   North: "north",
   South: "south",
@@ -38,6 +44,22 @@ const Cardinal = Object.freeze({
 })
 
 JS;
-        self::assertSame($expected, Cardinal::toJavaScript());
+        $expectedClass = <<<JS
+class Cardinal {
+  static North = new Cardinal("north")
+  static South = new Cardinal("south")
+  static East = new Cardinal("east")
+  static West = new Cardinal("west")
+
+  constructor(name) {
+    this.name = name
+  }
+}
+
+JS;
+
+        self::assertSame($expectedAssociative, Cardinal::toAssociative());
+        self::assertSame($expectedObject, Cardinal::toJavaScriptObject());
+        self::assertSame($expectedClass, Cardinal::toJavaScriptClass());
     }
 }
