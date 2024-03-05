@@ -6,6 +6,8 @@ namespace Bakame\Aide\Enum;
 
 use ReflectionEnum;
 
+use UnitEnum;
+
 use function array_column;
 use function array_search;
 use function count;
@@ -65,5 +67,35 @@ trait Info
             false => null,
             default => $res,
         };
+    }
+
+    /**
+     * Returns the list of cases not including the enum instance passed to the method call.
+     *
+     * @return array<UnitEnum>
+     */
+    public static function except(UnitEnum ...$values): array
+    {
+        return array_values(
+            array_filter(
+                static::cases(),
+                fn (UnitEnum $enum) => !in_array($enum, $values, true)
+            )
+        );
+    }
+
+    /**
+     * Returns the list of cases including only the enum listed in the method call if they exist.
+     *
+     * @return array<UnitEnum>
+     */
+    public static function only(UnitEnum ...$values): array
+    {
+        return array_values(
+            array_filter(
+                static::cases(),
+                fn (UnitEnum $enum) => in_array($enum, $values, true)
+            )
+        );
     }
 }

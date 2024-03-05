@@ -18,6 +18,8 @@ final class InfoTest extends TestCase
         self::assertSame(['Top', 'Down', 'Left', 'Right'], Direction::names());
         self::assertSame([], Direction::values());
         self::assertNull(Direction::nameOf('Up'));
+        self::assertSame([Direction::Down], Direction::only(Direction::Down));
+        self::assertSame([Direction::Left, Direction::Right], Direction::except(Direction::Top, Direction::Down));
     }
 
     #[Test]
