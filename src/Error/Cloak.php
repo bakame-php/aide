@@ -103,7 +103,7 @@ class Cloak
     /**
      * @throws ErrorException
      */
-    protected function errorHandler(int $errno, string $errstr, string $errfile = null, int $errline = null): bool
+    protected function errorHandler(int $errno, string $errstr, ?string $errfile = null, ?int $errline = null): bool
     {
         if (ReportingLevel::fromEnv()->doesNotContain($errno)) {
             return false;

@@ -39,7 +39,7 @@ final class JavaScriptConverter
         );
     }
 
-    public function propertyNameCase(Closure $casing = null): self
+    public function propertyNameCase(?Closure $casing = null): self
     {
         return new self(
             $this->useSymbol,
