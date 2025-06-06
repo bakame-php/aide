@@ -7,7 +7,6 @@ namespace Bakame\Aide\Error;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-
 use ValueError;
 
 use const E_ALL;
@@ -181,7 +180,13 @@ final class ReportingLevelTest extends TestCase
     public function it_can_be_included_or_excluded(): void
     {
         self::assertSame(['E_ALL', 'E_WARNING'], ReportingLevel::warning()->included());
-        self::assertSame(['E_WARNING'], ReportingLevel::fromExclusion('E_WARNING')->excluded());
+
+        $excluded = ['E_WARNING'];
+        if (PHP_VERSION_ID >= 80400) {
+            $excluded[] = 'E_STRICT';
+        }
+
+        self::assertSame($excluded, ReportingLevel::fromExclusion('E_WARNING')->excluded());
 
     }
 }

@@ -8,7 +8,6 @@ use ErrorException;
 use Exception;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-
 use ValueError;
 
 use const E_ALL;
